@@ -1,0 +1,22 @@
+# Secrets and API keys (never commit these)
+.env
+.env.local
+*.key
+
+# Dependencies (once we add Node/Electron later)
+node_modules/
+package-lock.json.bak
+
+# Build output (for later)
+dist/
+build/
+
+# Operating system junk
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp

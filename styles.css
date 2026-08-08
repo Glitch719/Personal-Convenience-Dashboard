@@ -1,0 +1,141 @@
+/* ============================================================
+   Design tokens: name our colours once, reuse everywhere.
+   Change --accent and the whole dashboard re-themes.
+   ============================================================ */
+:root {
+  --bg: #0f1116;
+  --surface: #191c24;
+  --surface-2: #20242e;
+  --border: #2a2f3a;
+  --text: #e9ebf0;
+  --muted: #868d9c;
+  --accent: #f2b34b;
+  --accent-soft: rgba(242, 179, 75, 0.12);
+  --night: #6f8bd0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 48px 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.dashboard { width: 100%; max-width: 1000px; }
+
+/* ---- Greeting ---- */
+.greeting { margin-bottom: 28px; }
+.greeting h1 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; }
+.greeting p { color: var(--muted); font-size: 16px; margin-top: 6px; }
+
+/* ---- Weather card ----
+   flex lays its two children out in a row and pushes them apart.
+   flex-wrap lets the stats drop below the temperature on narrow screens. */
+.weather-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.weather-city {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+
+.weather-main { display: flex; align-items: baseline; gap: 14px; }
+
+.weather-temp {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 52px; font-weight: 600; line-height: 1;
+}
+
+.weather-cond { color: var(--muted); font-size: 15px; }
+
+.weather-stats { display: flex; gap: 28px; }
+
+.stat { text-align: right; }
+.stat .val {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 20px; font-weight: 600;
+}
+.stat .key {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted); margin-top: 3px;
+}
+
+.weather-error { color: var(--muted); font-size: 14px; }
+
+/* ---- Clock grid ----
+   grid with auto-fit: cards size themselves and wrap to new rows
+   automatically, no media queries needed for the wrapping itself. */
+.clock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.clock-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.clock-card.local {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* A card whose timezone was invalid: dimmed and outlined, clearly
+   "not working" but harmless to the rest of the dashboard. */
+.clock-card.broken {
+  opacity: 0.55;
+  border-style: dashed;
+}
+.clock-card.broken .time { color: var(--muted); }
+
+.daynight-strip {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.daynight-strip.day   { background: var(--accent); }
+.daynight-strip.night { background: var(--night); }
+
+.city {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+}
+.clock-card.local .city { color: var(--accent); }
+
+.time {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 40px; font-weight: 600;
+  margin: 10px 0 6px; font-variant-numeric: tabular-nums;
+}
+
+.meta { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+.dot.day   { background: var(--accent); }
+.dot.night { background: var(--night); }
+
+/* ---- Small screens ---- */
+@media (max-width: 600px) {
+  body { padding: 32px 18px; }
+  .greeting h1 { font-size: 28px; }
+  .weather-temp { font-size: 44px; }
+  .weather-stats { gap: 20px; }
+}

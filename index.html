@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Our styles now live in their own file. -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="dashboard">
+
+    <header class="greeting">
+      <h1 id="greeting-text">Hello.</h1>
+      <p id="greeting-sub">Loading your day...</p>
+    </header>
+
+    <!-- Weather widget. JavaScript fills in the numbers. -->
+    <section class="weather-card" id="weather">
+      <div class="weather-left">
+        <div class="weather-city" id="weather-city"></div>
+        <div class="weather-main">
+          <span class="weather-temp" id="weather-temp">--&deg;</span>
+          <span class="weather-cond" id="weather-cond">Loading weather...</span>
+        </div>
+      </div>
+      <div class="weather-stats" id="weather-stats"></div>
+    </section>
+
+    <!-- Clock widget. Also filled in by JavaScript. -->
+    <section class="clock-grid" id="clock-grid"></section>
+
+  </div>
+
+  <!-- Our behaviour now lives in its own file, loaded last so the -->
+  <!-- HTML above already exists by the time the script runs. -->
+  <script src="app.js"></script>
+</body>
+</html>
