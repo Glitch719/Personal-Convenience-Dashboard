@@ -14,6 +14,12 @@
 </head>
 
 <body>
+  <button class="settings-btn" id="settings-btn">Settings</button>
+  <div class="settings-panel" id="settings-panel" hidden>
+    <h2>Widgets</h2>
+    <div class="settings-list" id="settings-list"></div>
+  </div>
+
   <div class="dashboard">
 
     <header class="greeting">
@@ -22,13 +28,13 @@
     </header>
 
     <!-- Today summary: reads snapshots from the other widgets. -->
-    <section class="summary-card" id="summary">
+    <section class="summary-card" id="summary" data-widget="summary" data-widget-label="Today">
       <div class="summary-header"><h2>Today</h2></div>
       <div class="summary-body" id="summary-body"></div>
     </section>
 
     <!-- Weather widget. JavaScript fills in the numbers. -->
-    <section class="weather-card" id="weather">
+    <section class="weather-card" id="weather" data-widget="weather" data-widget-label="Weather">
       <div class="weather-left">
         <div class="weather-city" id="weather-city"></div>
         <div class="weather-main">
@@ -40,10 +46,10 @@
     </section>
 
     <!-- Clock widget. Also filled in by JavaScript. -->
-    <section class="clock-grid" id="clock-grid"></section>
+    <section class="clock-grid" id="clock-grid" data-widget="clock" data-widget-label="Clocks"></section>
 
     <!-- Tasks widget. -->
-    <section class="tasks-card" id="tasks">
+    <section class="tasks-card" id="tasks" data-widget="tasks" data-widget-label="Tasks">
       <div class="tasks-header">
         <h2>Tasks</h2>
         <span class="tasks-count" id="tasks-count"></span>
@@ -56,7 +62,7 @@
     </section>
 
     <!-- Reminders widget. -->
-    <section class="reminders-card" id="reminders">
+    <section class="reminders-card" id="reminders" data-widget="reminders" data-widget-label="Reminders">
       <h2>Reminders</h2>
       <div class="reminder-input-row">
         <input type="text" id="reminder-text" placeholder="Remind me to..." />
@@ -67,7 +73,7 @@
     </section>
 
     <!-- Calendar widget. -->
-    <section class="calendar-card" id="calendar">
+    <section class="calendar-card" id="calendar" data-widget="calendar" data-widget-label="Calendar">
       <div class="cal-header">
         <h2 id="cal-title">Calendar</h2>
         <div class="cal-nav">
