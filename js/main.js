@@ -9,6 +9,7 @@ import { initWeather }  from "./widgets/weather.js";
 import { initTasks }    from "./widgets/tasks.js";
 import { initReminders } from "./widgets/reminders.js";
 import { initCalendar } from "./widgets/calendar.js";
+import { initNews }     from "./widgets/news.js";
 import { initSummary }  from "./widgets/summary.js";
 import { initSettings } from "./widgets/settings.js";
 
@@ -18,5 +19,6 @@ runSafely("weather",   initWeather);
 runSafely("tasks",     initTasks);
 runSafely("reminders", initReminders);
 runSafely("calendar",  initCalendar);
+runSafely("news",      initNews);
 runSafely("summary",   initSummary);   // last widget: others publish before it first reads
 runSafely("settings",  initSettings);  // controls which of the above are shown

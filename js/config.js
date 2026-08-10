@@ -21,3 +21,11 @@ export const WEATHER_CODES = {
   85: "Snow showers",    86: "Snow showers",
   95: "Thunderstorm",    96: "Thunderstorm",  99: "Thunderstorm",
 };
+
+// News feeds. Add or remove any RSS/Atom feed URL here; the widget merges
+// them into one list. This is the "customizable sources" hook.
+export const NEWS_FEEDS = [
+  { name: "BBC World",   url: "https://feeds.bbci.co.uk/news/world/rss.xml" },
+  { name: "NPR",         url: "https://feeds.npr.org/1001/rss.xml" },
+  { name: "Al Jazeera",  url: "https://www.aljazeera.com/xml/rss/all.xml" },
+];
