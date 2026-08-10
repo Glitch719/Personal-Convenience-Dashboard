@@ -9,6 +9,7 @@ import { initWeather }  from "./widgets/weather.js";
 import { initTasks }    from "./widgets/tasks.js";
 import { initReminders } from "./widgets/reminders.js";
 import { initCalendar } from "./widgets/calendar.js";
+import { initSummary }  from "./widgets/summary.js";
 
 runSafely("greeting",  initGreeting);
 runSafely("clock",     initClock);
@@ -16,3 +17,4 @@ runSafely("weather",   initWeather);
 runSafely("tasks",     initTasks);
 runSafely("reminders", initReminders);
 runSafely("calendar",  initCalendar);
+runSafely("summary",   initSummary);   // last: the others publish before it first reads

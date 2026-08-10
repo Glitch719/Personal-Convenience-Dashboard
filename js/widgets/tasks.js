@@ -1,4 +1,5 @@
 import { loadJSON, saveJSON } from "../storage.js";
+import { state } from "../state.js";
 
 const TASKS_KEY = "dashboard.tasks";
 
@@ -64,6 +65,15 @@ export function initTasks() {
 
     const remaining = tasks.filter(function (t) { return !t.done; }).length;
     count.textContent = tasks.length === 0 ? "" : remaining + " of " + tasks.length + " left";
+
+    // Publish a snapshot for the Today summary: totals plus the first
+    // unfinished task, so the summary can show "next: ...".
+    const firstUndone = tasks.find(function (t) { return !t.done; });
+    state.taskSummary = {
+      total: tasks.length,
+      remaining: remaining,
+      top: firstUndone ? firstUndone.text : null,
+    };
   }
 
   function submit() {

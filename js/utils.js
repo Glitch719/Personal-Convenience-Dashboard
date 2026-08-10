@@ -31,3 +31,17 @@ export function partsFor(zone) {
   fmt.formatToParts(new Date()).forEach(function (part) { p[part.type] = part.value; });
   return p;
 }
+
+// Turn a moment into "in 2 hours", "5 minutes ago", "tomorrow", etc.
+// Shared by the reminders widget and the Today summary.
+const _relFmt = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+export function formatRelative(ms) {
+  const diff = ms - Date.now();            // positive = future, negative = past
+  const abs = Math.abs(diff);
+  const MIN = 60000, HOUR = 60 * MIN, DAY = 24 * HOUR;
+  if (abs < MIN)  return "now";
+  if (abs < HOUR) return _relFmt.format(Math.round(diff / MIN), "minute");
+  if (abs < DAY)  return _relFmt.format(Math.round(diff / HOUR), "hour");
+  return _relFmt.format(Math.round(diff / DAY), "day");
+}

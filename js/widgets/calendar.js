@@ -1,4 +1,5 @@
 import { loadJSON, saveJSON } from "../storage.js";
+import { state } from "../state.js";
 
 const EVENTS_KEY = "dashboard.events";
 
@@ -26,6 +27,31 @@ export function initCalendar() {
 
   function save() { saveJSON(EVENTS_KEY, events); }
 
+  // Combine an event's date and optional time into a single timestamp.
+  function eventWhenMs(ev) {
+    return new Date(ev.date + "T" + (ev.time || "00:00")).getTime();
+  }
+
+  // Publish the soonest still-upcoming event for the Today summary. This is
+  // pure computation, no DOM work, so it's safe to run on a timer without
+  // disturbing anything the user is editing.
+  function publishNextEvent() {
+    const now = Date.now();
+    const upcoming = events
+      .map(function (e) { return { ev: e, whenMs: eventWhenMs(e) }; })
+      .filter(function (x) { return x.whenMs >= now; })
+      .sort(function (a, b) { return a.whenMs - b.whenMs; });
+
+    state.nextEvent = upcoming.length
+      ? {
+          title: upcoming[0].ev.title,
+          time: upcoming[0].ev.time,
+          notes: upcoming[0].ev.notes,
+          whenMs: upcoming[0].whenMs,
+        }
+      : null;
+  }
+
   function eventsOn(key) {
     return events
       .filter(function (e) { return e.date === key; })
@@ -37,6 +63,7 @@ export function initCalendar() {
   function addEvent(key, title, time) {
     events.push({ id: Date.now().toString(), date: key, time: time || "", title: title, notes: "" });
     save();
+    publishNextEvent();
     renderCalendar();
     renderPanel();
   }
@@ -44,6 +71,7 @@ export function initCalendar() {
   function deleteEvent(id) {
     events = events.filter(function (e) { return e.id !== id; });
     save();
+    publishNextEvent();
     renderCalendar();
     renderPanel();
   }
@@ -251,4 +279,6 @@ export function initCalendar() {
 
   renderCalendar();
   renderPanel();
+  publishNextEvent();
+  setInterval(publishNextEvent, 60000);   // keep the summary's "next event" fresh
 }

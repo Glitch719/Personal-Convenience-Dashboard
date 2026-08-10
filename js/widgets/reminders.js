@@ -1,27 +1,18 @@
 import { loadJSON, saveJSON } from "../storage.js";
+import { formatRelative } from "../utils.js";
+import { state } from "../state.js";
 
 const REMINDERS_KEY = "dashboard.reminders";
 
-// Formatters, built once and reused. Same Intl family as the clock.
+// Absolute time formatting stays here (it's reminder-specific). The
+// relative formatter now lives in utils.js and is shared with the summary.
 const absFmt = new Intl.DateTimeFormat("en-GB", {
   weekday: "short", day: "numeric", month: "short",
   hour: "2-digit", minute: "2-digit", hour12: false,
 });
-const relFmt = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
 
 function formatAbsolute(ms) {
   return absFmt.format(new Date(ms));
-}
-
-// Turn a moment into "in 2 hours", "5 minutes ago", "tomorrow", etc.
-// Intl picks the right words and handles plurals for us.
-function formatRelative(ms) {
-  const diff = ms - Date.now();           // positive = future, negative = past
-  const abs = Math.abs(diff);
-  const MIN = 60000, HOUR = 60 * MIN, DAY = 24 * HOUR;
-  if (abs < HOUR) return relFmt.format(Math.round(diff / MIN), "minute");
-  if (abs < DAY)  return relFmt.format(Math.round(diff / HOUR), "hour");
-  return relFmt.format(Math.round(diff / DAY), "day");
 }
 
 export function initReminders() {
@@ -53,6 +44,12 @@ export function initReminders() {
 
   function render() {
     reminders.sort(function (a, b) { return a.time - b.time; });   // soonest first
+
+    // Publish the next still-upcoming reminder for the Today summary.
+    const upcoming = reminders.filter(function (r) { return r.time >= Date.now(); });
+    state.nextReminder = upcoming.length
+      ? { text: upcoming[0].text, time: upcoming[0].time }
+      : null;
 
     list.innerHTML = "";
     if (reminders.length === 0) {

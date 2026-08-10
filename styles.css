@@ -342,3 +342,32 @@ body {
   .cal-chip { display: none; }        /* keep small screens tidy; chips return on wider views */
   .cal-daynum { margin-bottom: 0; }
 }
+
+/* ---- Today summary ---- */
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);   /* a quiet accent to mark it as the lead panel */
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.summary-header h2 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); font-weight: 600; margin-bottom: 14px;
+}
+
+.summary-body { display: flex; flex-direction: column; gap: 10px; }
+
+.summary-row { display: flex; gap: 14px; align-items: baseline; }
+.summary-key {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted); width: 92px; flex-shrink: 0;
+}
+.summary-val { font-size: 15px; }
+
+@media (max-width: 600px) {
+  .summary-row { flex-direction: column; gap: 2px; }
+  .summary-key { width: auto; }
+}
