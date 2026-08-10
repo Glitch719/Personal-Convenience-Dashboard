@@ -3,6 +3,7 @@
    Change --accent and the whole dashboard re-themes.
    ============================================================ */
 :root {
+  color-scheme: dark;   /* makes native controls (date picker, scrollbars) dark */
   --bg: #0f1116;
   --surface: #191c24;
   --surface-2: #20242e;
@@ -139,3 +140,128 @@ body {
   .weather-temp { font-size: 44px; }
   .weather-stats { gap: 20px; }
 }
+
+/* ---- Tasks widget ---- */
+.tasks-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+.tasks-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.tasks-header h2 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.tasks-count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.task-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+
+#task-input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+}
+#task-input:focus { outline: none; border-color: var(--accent); }
+#task-input::placeholder { color: var(--muted); }
+
+#task-add {
+  background: var(--accent);
+  color: #1a1204;
+  border: none;
+  border-radius: 9px;
+  padding: 0 16px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+#task-add:hover { filter: brightness(1.05); }
+
+.task-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+.task {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 8px; border-radius: 8px;
+}
+.task:hover { background: var(--surface-2); }
+
+.task input[type="checkbox"] {
+  width: 17px; height: 17px;
+  accent-color: var(--accent);   /* themes the native checkbox */
+  cursor: pointer; flex-shrink: 0;
+}
+
+.task-text { flex: 1; font-size: 14px; }
+.task.done .task-text { color: var(--muted); text-decoration: line-through; }
+
+.task-del {
+  background: none; border: none;
+  color: var(--muted); font-size: 20px; line-height: 1;
+  cursor: pointer; opacity: 0; padding: 0 4px;
+}
+.task:hover .task-del { opacity: 1; }
+.task-del:hover { color: #e5766b; }
+
+.task-empty { color: var(--muted); font-size: 14px; padding: 8px; }
+
+/* ---- Reminders widget ---- */
+.reminders-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+.reminders-card h2 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 16px; }
+
+.reminder-input-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+
+#reminder-text {
+  flex: 1; min-width: 160px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+  padding: 10px 12px; color: var(--text); font-size: 14px; font-family: inherit;
+}
+#reminder-time {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+  padding: 10px 12px; color: var(--text); font-size: 14px; font-family: inherit;
+}
+#reminder-text:focus, #reminder-time:focus { outline: none; border-color: var(--accent); }
+#reminder-text::placeholder { color: var(--muted); }
+
+#reminder-add {
+  background: var(--accent); color: #1a1204; border: none; border-radius: 9px;
+  padding: 0 16px; font-weight: 600; font-size: 14px; cursor: pointer;
+}
+#reminder-add:hover { filter: brightness(1.05); }
+
+.reminder-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+
+.reminder {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 8px; border-radius: 8px;
+}
+.reminder:hover { background: var(--surface-2); }
+
+.reminder-main { flex: 1; }
+.reminder-text { font-size: 14px; }
+.reminder-when { font-size: 12px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+/* A reminder whose time has passed. */
+.reminder.overdue { background: var(--accent-soft); }
+.reminder.overdue .reminder-when { color: var(--accent); }
+
+.reminder-del {
+  background: none; border: none; color: var(--muted);
+  font-size: 20px; line-height: 1; cursor: pointer; opacity: 0; padding: 0 4px;
+}
+.reminder:hover .reminder-del { opacity: 1; }
+.reminder-del:hover { color: #e5766b; }
+
+.reminder-empty { color: var(--muted); font-size: 14px; padding: 8px; }

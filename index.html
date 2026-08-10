@@ -36,10 +36,34 @@
     <!-- Clock widget. Also filled in by JavaScript. -->
     <section class="clock-grid" id="clock-grid"></section>
 
+    <!-- Tasks widget. -->
+    <section class="tasks-card" id="tasks">
+      <div class="tasks-header">
+        <h2>Tasks</h2>
+        <span class="tasks-count" id="tasks-count"></span>
+      </div>
+      <div class="task-input-row">
+        <input type="text" id="task-input" placeholder="Add a task and press Enter" />
+        <button id="task-add">Add</button>
+      </div>
+      <ul class="task-list" id="task-list"></ul>
+    </section>
+
+    <!-- Reminders widget. -->
+    <section class="reminders-card" id="reminders">
+      <h2>Reminders</h2>
+      <div class="reminder-input-row">
+        <input type="text" id="reminder-text" placeholder="Remind me to..." />
+        <input type="datetime-local" id="reminder-time" />
+        <button id="reminder-add">Add</button>
+      </div>
+      <ul class="reminder-list" id="reminder-list"></ul>
+    </section>
+
   </div>
 
-  <!-- Our behaviour now lives in its own file, loaded last so the -->
-  <!-- HTML above already exists by the time the script runs. -->
-  <script src="app.js"></script>
+  <!-- One entry point, loaded as a module so it can import the others. -->
+  <!-- type="module" requires a server (Live Server), not a double-clicked file. -->
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
