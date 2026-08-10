@@ -8,9 +8,11 @@ import { initClock }    from "./widgets/clock.js";
 import { initWeather }  from "./widgets/weather.js";
 import { initTasks }    from "./widgets/tasks.js";
 import { initReminders } from "./widgets/reminders.js";
+import { initCalendar } from "./widgets/calendar.js";
 
 runSafely("greeting",  initGreeting);
 runSafely("clock",     initClock);
 runSafely("weather",   initWeather);
 runSafely("tasks",     initTasks);
 runSafely("reminders", initReminders);
+runSafely("calendar",  initCalendar);
