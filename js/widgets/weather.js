@@ -58,6 +58,9 @@ function renderWeather(w, statsEl) {
 }
 
 export function initWeather() {
+  // Show a shimmer placeholder until the first fetch resolves.
+  document.getElementById("weather-stats").innerHTML =
+    '<div class="skeleton" style="width:170px;height:40px;border-radius:8px"></div>';
   loadWeather();
   setInterval(loadWeather, 10 * 60 * 1000);   // refresh every 10 minutes
 }

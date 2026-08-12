@@ -38,6 +38,22 @@
   --danger: #e5766b;
 }
 
+/* ===== Theme: Light ===== */
+[data-theme="light"] {
+  color-scheme: light;            /* light native controls, scrollbars, pickers */
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --surface-2: #eceff3;
+  --border: #dfe3e9;
+  --text: #171a1f;
+  --muted: #667085;
+  --accent: #4c9a06;              /* a deeper green, readable on white */
+  --accent-soft: rgba(76, 154, 6, 0.13);
+  --accent-text: #ffffff;         /* white text on the darker accent */
+  --night: #4f6fb0;
+  --danger: #d64535;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -48,6 +64,7 @@ body {
   padding: 48px 32px;
   display: flex;
   justify-content: center;
+  overflow-wrap: break-word;   /* long words / URLs wrap instead of overflowing */
 }
 
 h1, h2, h3 { font-family: var(--font-display); }
@@ -123,15 +140,17 @@ h1, h2, h3 { font-family: var(--font-display); }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
+  margin-bottom: 16px;   /* match the spacing every card has below it */
 }
 
 .clock-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 20px;
+  padding: 16px;
   position: relative;
   overflow: hidden;
+  container-type: inline-size;   /* lets children size relative to THIS card's width */
 }
 
 .clock-card.local {
@@ -161,7 +180,9 @@ h1, h2, h3 { font-family: var(--font-display); }
 
 .time {
   font-family: "JetBrains Mono", monospace;
-  font-size: 40px; font-weight: 600;
+  /* scale with the card: 14% of the card's width, clamped so it never
+     drops below ~19px or grows past 32px. This is why it can't overflow. */
+  font-size: clamp(1.2rem, 14cqi, 2rem); font-weight: 600;
   margin: 10px 0 6px; font-variant-numeric: tabular-nums;
 }
 
@@ -645,3 +666,68 @@ h1, h2, h3 { font-family: var(--font-display); }
 .theme-option:hover { border-color: var(--accent); }
 .theme-option.active { border-color: var(--accent); color: var(--accent); }
 .settings-divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* ---- Responsive safeguards ----
+   Flex children default to a minimum width of their content, which makes
+   them refuse to shrink and overflow instead. Setting min-width: 0 lets
+   these text columns shrink so long content wraps rather than spilling. */
+.task-text,
+.reminder-main,
+.grocery-text,
+.exp-item-left,
+.habit-name,
+.summary-val {
+  min-width: 0;
+}
+
+/* ============================================================
+   Detail & motion
+   ============================================================ */
+
+/* Smooth interactive transitions */
+button, input, select, textarea,
+.clock-card, .cal-cell, .link-chip, .theme-option, .settings-row,
+.task, .grocery-item, .reminder, .exp-item, .news-item, .habit-day, .link-anchor {
+  transition: background-color .15s ease, border-color .15s ease,
+              color .15s ease, filter .15s ease, transform .12s ease;
+}
+
+/* Tactile press feedback on buttons */
+button:active { transform: translateY(1px); }
+
+/* Clear keyboard focus ring (only shows for keyboard users, not mouse clicks) */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Cards ease in on load */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.greeting,
+.summary-card,
+.widget-grid > section {
+  animation: cardIn .4s ease both;
+}
+
+/* Loading skeletons: a shimmer that stands in for content while it loads */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 37%, var(--surface-2) 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+  color: transparent;
+}
+.skeleton-line { height: 13px; margin: 8px 0; }
+
+/* Respect users who ask their system for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

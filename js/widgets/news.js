@@ -3,6 +3,14 @@ import { formatRelative } from "../utils.js";
 
 const MAX_ARTICLES = 12;   // how many headlines to show after merging feeds
 
+// Shimmer placeholder shown while the first load is in flight.
+const NEWS_SKELETON = Array.from({ length: 5 }).map(function () {
+  return '<li class="news-item">'
+    + '<div class="skeleton skeleton-line" style="width:85%"></div>'
+    + '<div class="skeleton skeleton-line" style="width:35%;height:10px"></div>'
+    + '</li>';
+}).join("");
+
 // Public CORS proxies, tried in order until one works. Free public proxies
 // are individually flaky, so a fallback chain makes the widget resilient:
 // if the first is down or rate-limited, we quietly try the next. All of
@@ -73,8 +81,13 @@ async function fetchFeed(feed) {
 export function initNews() {
   const listEl = document.getElementById("news-list");
 
+  let firstLoad = true;
+
   async function load() {
-    listEl.innerHTML = '<li class="news-loading">Loading news...</li>';
+    if (firstLoad) {
+      listEl.innerHTML = NEWS_SKELETON;   // shimmer only on the initial load
+      firstLoad = false;
+    }
 
     // Fetch every feed in parallel. allSettled means one failing feed does
     // not sink the others: we keep whatever succeeded.

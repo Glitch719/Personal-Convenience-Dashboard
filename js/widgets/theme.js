@@ -6,6 +6,7 @@ const THEME_KEY = "dashboard.theme";
 // CSS. That is the whole cost of a new theme, thanks to CSS variables.
 export const THEMES = [
   { id: "bold",    label: "Bold" },
+  { id: "light",   label: "Light" },
   { id: "control", label: "Control panel" },
 ];
 
