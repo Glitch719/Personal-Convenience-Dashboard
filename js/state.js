@@ -12,4 +12,5 @@ export const state = {
   taskSummary: null,      // tasks     -> summary             { total, remaining, top }
   nextReminder: null,     // reminders -> summary             { text, time }
   nextEvent: null,        // calendar  -> summary             { title, time, whenMs, ... }
+  expenseTotal: null,     // expenses  -> summary             { amount, currency }
 };

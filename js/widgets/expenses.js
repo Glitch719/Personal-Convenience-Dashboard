@@ -1,5 +1,6 @@
 import { loadJSON, saveJSON } from "../storage.js";
 import { CURRENCY, EXPENSE_CATEGORIES } from "../config.js";
+import { state } from "../state.js";
 
 const EXPENSES_KEY = "dashboard.expenses";
 const monthFmt = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" });
@@ -20,6 +21,17 @@ export function initExpenses() {
   const chartEl     = document.getElementById("exp-chart");
 
   function save() { saveJSON(EXPENSES_KEY, entries); }
+
+  // Publish the ACTUAL current month's total for the summary (independent of
+  // which month the user is currently browsing in the widget).
+  function publishSummary() {
+    const t = new Date();
+    const prefix = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0");
+    const total = entries
+      .filter(function (e) { return e.date.startsWith(prefix); })
+      .reduce(function (sum, e) { return sum + e.amount; }, 0);
+    state.expenseTotal = { amount: total, currency: CURRENCY };
+  }
 
   function money(n) { return CURRENCY + n.toFixed(2); }
 
@@ -45,12 +57,12 @@ export function initExpenses() {
 
   function addEntry(amount, category, date) {
     entries.push({ id: Date.now().toString(), amount: amount, category: category, date: date });
-    save(); render();
+    save(); publishSummary(); render();
   }
 
   function deleteEntry(id) {
     entries = entries.filter(function (e) { return e.id !== id; });
-    save(); render();
+    save(); publishSummary(); render();
   }
 
   function render() {
@@ -177,5 +189,6 @@ export function initExpenses() {
   document.getElementById("exp-prev").addEventListener("click", function () { shiftMonth(-1); });
   document.getElementById("exp-next").addEventListener("click", function () { shiftMonth(1); });
 
+  publishSummary();
   render();
 }

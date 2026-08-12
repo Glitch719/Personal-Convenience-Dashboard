@@ -39,6 +39,12 @@ export function initSummary() {
       lines.push(line("Tasks", "All clear"));
     }
 
+    // Spending this month (published by the expenses widget)
+    if (state.expenseTotal) {
+      const e = state.expenseTotal;
+      lines.push(line("Spending", e.currency + e.amount.toFixed(2) + " this month"));
+    }
+
     // Next reminder (published by the reminders widget)
     if (state.nextReminder) {
       const r = state.nextReminder;

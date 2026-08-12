@@ -4,6 +4,27 @@
    ============================================================ */
 :root {
   color-scheme: dark;   /* makes native controls (date picker, scrollbars) dark */
+  --font-display: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ===== Theme: Bold (default) ===== */
+:root,
+[data-theme="bold"] {
+  --bg: #0a0b0d;
+  --surface: #131519;
+  --surface-2: #1d2027;
+  --border: #282c34;
+  --text: #f4f5f7;
+  --muted: #9297a2;
+  --accent: #c6ee4a;
+  --accent-soft: rgba(198, 238, 74, 0.14);
+  --accent-text: #0c1005;   /* dark text placed on top of the accent colour */
+  --night: #6f8bd0;
+  --danger: #ff6b5b;
+}
+
+/* ===== Theme: Control panel (the original amber on slate) ===== */
+[data-theme="control"] {
   --bg: #0f1116;
   --surface: #191c24;
   --surface-2: #20242e;
@@ -12,7 +33,9 @@
   --muted: #868d9c;
   --accent: #f2b34b;
   --accent-soft: rgba(242, 179, 75, 0.12);
+  --accent-text: #1a1204;
   --night: #6f8bd0;
+  --danger: #e5766b;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,11 +50,25 @@ body {
   justify-content: center;
 }
 
-.dashboard { width: 100%; max-width: 1000px; }
+h1, h2, h3 { font-family: var(--font-display); }
+
+.dashboard { width: 100%; max-width: 1280px; }
+
+/* Masonry-style layout: the browser fits as many ~380px columns as the
+   width allows, and cards flow to fill them. Collapses to one column on
+   narrow screens automatically, no media queries needed for the count. */
+.widget-grid {
+  column-width: 380px;
+  column-gap: 16px;
+}
+.widget-grid > section {
+  break-inside: avoid;            /* don't split a card across two columns */
+  -webkit-column-break-inside: avoid;
+}
 
 /* ---- Greeting ---- */
 .greeting { margin-bottom: 28px; }
-.greeting h1 { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; }
+.greeting h1 { font-size: 44px; font-weight: 700; letter-spacing: -0.03em; }
 .greeting p { color: var(--muted); font-size: 16px; margin-top: 6px; }
 
 /* ---- Weather card ----
@@ -84,7 +121,7 @@ body {
    automatically, no media queries needed for the wrapping itself. */
 .clock-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
 
@@ -136,7 +173,7 @@ body {
 /* ---- Small screens ---- */
 @media (max-width: 600px) {
   body { padding: 32px 18px; }
-  .greeting h1 { font-size: 28px; }
+  .greeting h1 { font-size: 34px; }
   .weather-temp { font-size: 44px; }
   .weather-stats { gap: 20px; }
 }
@@ -174,7 +211,7 @@ body {
 
 #task-add {
   background: var(--accent);
-  color: #1a1204;
+  color: var(--accent-text);
   border: none;
   border-radius: 9px;
   padding: 0 16px;
@@ -207,7 +244,7 @@ body {
   cursor: pointer; opacity: 0; padding: 0 4px;
 }
 .task:hover .task-del { opacity: 1; }
-.task-del:hover { color: #e5766b; }
+.task-del:hover { color: var(--danger); }
 
 .task-empty { color: var(--muted); font-size: 14px; padding: 8px; }
 
@@ -236,7 +273,7 @@ body {
 #reminder-text::placeholder { color: var(--muted); }
 
 #reminder-add {
-  background: var(--accent); color: #1a1204; border: none; border-radius: 9px;
+  background: var(--accent); color: var(--accent-text); border: none; border-radius: 9px;
   padding: 0 16px; font-weight: 600; font-size: 14px; cursor: pointer;
 }
 #reminder-add:hover { filter: brightness(1.05); }
@@ -262,7 +299,7 @@ body {
   font-size: 20px; line-height: 1; cursor: pointer; opacity: 0; padding: 0 4px;
 }
 .reminder:hover .reminder-del { opacity: 1; }
-.reminder-del:hover { color: #e5766b; }
+.reminder-del:hover { color: var(--danger); }
 
 .reminder-empty { color: var(--muted); font-size: 14px; padding: 8px; }
 
@@ -319,7 +356,7 @@ body {
 }
 .cal-add-row input[type="text"] { flex: 1; min-width: 140px; }
 .cal-add-row input:focus { outline: none; border-color: var(--accent); }
-.cal-add-row button { background: var(--accent); color: #1a1204; border: none; font-weight: 600; cursor: pointer; }
+.cal-add-row button { background: var(--accent); color: var(--accent-text); border: none; font-weight: 600; cursor: pointer; }
 .cal-add-row button:hover { filter: brightness(1.05); }
 
 .cal-event { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
@@ -327,7 +364,7 @@ body {
 .cal-event-title { font-size: 14px; font-weight: 600; }
 .cal-event-time { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .cal-event-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
-.cal-event-del:hover { color: #e5766b; }
+.cal-event-del:hover { color: var(--danger); }
 
 .cal-notes-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 4px; }
 .cal-notes {
@@ -445,7 +482,7 @@ body {
 #grocery-input:focus { outline: none; border-color: var(--accent); }
 #grocery-input::placeholder { color: var(--muted); }
 #grocery-add {
-  background: var(--accent); color: #1a1204; border: none; border-radius: 9px;
+  background: var(--accent); color: var(--accent-text); border: none; border-radius: 9px;
   padding: 0 16px; font-weight: 600; font-size: 14px; cursor: pointer;
 }
 #grocery-add:hover { filter: brightness(1.05); }
@@ -458,7 +495,7 @@ body {
 .grocery-item.done .grocery-text { color: var(--muted); text-decoration: line-through; }
 .grocery-del { background: none; border: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; opacity: 0; padding: 0 4px; }
 .grocery-item:hover .grocery-del { opacity: 1; }
-.grocery-del:hover { color: #e5766b; }
+.grocery-del:hover { color: var(--danger); }
 .grocery-empty { color: var(--muted); font-size: 14px; padding: 8px; }
 
 /* ---- Focus timer widget ---- */
@@ -490,7 +527,7 @@ body {
   cursor: pointer; font-family: inherit;
 }
 .focus-controls button:hover { border-color: var(--accent); }
-.focus-primary { background: var(--accent); color: #1a1204; border-color: var(--accent); }
+.focus-primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 .focus-primary:hover { filter: brightness(1.05); }
 
 /* ---- Expense tracker widget ---- */
@@ -520,7 +557,7 @@ body {
 }
 #exp-amount { width: 110px; }
 .exp-input-row input:focus, .exp-input-row select:focus { outline: none; border-color: var(--accent); }
-#exp-add { background: var(--accent); color: #1a1204; border: none; font-weight: 600; cursor: pointer; padding: 0 16px; border-radius: 9px; }
+#exp-add { background: var(--accent); color: var(--accent-text); border: none; font-weight: 600; cursor: pointer; padding: 0 16px; border-radius: 9px; }
 #exp-add:hover { filter: brightness(1.05); }
 
 /* the hand-drawn bar chart */
@@ -540,5 +577,71 @@ body {
 .exp-item-amount { font-family: "JetBrains Mono", monospace; font-size: 14px; }
 .exp-del { background: none; border: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; opacity: 0; padding: 0 4px; }
 .exp-item:hover .exp-del { opacity: 1; }
-.exp-del:hover { color: #e5766b; }
+.exp-del:hover { color: var(--danger); }
 .exp-empty { color: var(--muted); font-size: 14px; padding: 8px; }
+
+/* ---- Habit tracker widget ---- */
+.habits-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px; }
+.habits-header h2 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 14px; }
+
+.habits-input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+#habit-input {
+  flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+  padding: 10px 12px; color: var(--text); font-size: 14px; font-family: inherit;
+}
+#habit-input:focus { outline: none; border-color: var(--accent); }
+#habit-input::placeholder { color: var(--muted); }
+#habit-add { background: var(--accent); color: var(--accent-text); border: none; border-radius: 9px; padding: 0 16px; font-weight: 600; font-size: 14px; cursor: pointer; }
+#habit-add:hover { filter: brightness(1.05); }
+
+.habits-list { display: flex; flex-direction: column; gap: 16px; }
+.habit-row {}
+.habit-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.habit-name { font-size: 14px; font-weight: 600; flex: 1; }
+.habit-streak { font-size: 12px; color: var(--muted); }
+.habit-streak.active { color: var(--accent); }
+.habit-del { background: none; border: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; }
+.habit-del:hover { color: var(--danger); }
+
+.habit-days { display: flex; gap: 6px; }
+.habit-day {
+  width: 34px; height: 34px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+  cursor: pointer; font-size: 12px; font-family: inherit;
+}
+.habit-day:hover { border-color: var(--accent); }
+.habit-day.done { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
+
+.habits-empty { color: var(--muted); font-size: 14px; padding: 4px; }
+
+/* ---- Quick links widget ---- */
+.links-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; margin-bottom: 16px; }
+.links-header h2 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 14px; }
+
+.links-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.link-chip { display: flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; }
+.link-chip:hover { border-color: var(--accent); }
+.link-anchor { color: var(--text); text-decoration: none; font-size: 14px; }
+.link-anchor:hover { color: var(--accent); }
+.link-del { background: none; border: none; color: var(--muted); font-size: 16px; line-height: 1; cursor: pointer; padding: 0; }
+.link-del:hover { color: var(--danger); }
+
+.links-input-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.links-input-row input { background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; color: var(--text); font-size: 14px; font-family: inherit; }
+#link-label { width: 120px; }
+#link-url { flex: 1; min-width: 160px; }
+.links-input-row input:focus { outline: none; border-color: var(--accent); }
+.links-input-row button { background: var(--accent); color: var(--accent-text); border: none; border-radius: 9px; padding: 0 16px; font-weight: 600; cursor: pointer; }
+.links-input-row button:hover { filter: brightness(1.05); }
+.links-empty { color: var(--muted); font-size: 14px; }
+
+/* ---- Theme switcher (in the settings panel) ---- */
+.theme-options { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+.theme-option {
+  text-align: left; background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 13px;
+  cursor: pointer; font-family: inherit;
+}
+.theme-option:hover { border-color: var(--accent); }
+.theme-option.active { border-color: var(--accent); color: var(--accent); }
+.settings-divider { height: 1px; background: var(--border); margin: 12px 0; }
