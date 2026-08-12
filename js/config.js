@@ -29,3 +29,7 @@ export const NEWS_FEEDS = [
   { name: "NPR",         url: "https://feeds.npr.org/1001/rss.xml" },
   { name: "Al Jazeera",  url: "https://www.aljazeera.com/xml/rss/all.xml" },
 ];
+
+// Expense tracker settings.
+export const CURRENCY = "$";   // change to your symbol, e.g. "\u20B9" or "\u20AC"
+export const EXPENSE_CATEGORIES = ["Food", "Transport", "Bills", "Shopping", "Health", "Other"];
