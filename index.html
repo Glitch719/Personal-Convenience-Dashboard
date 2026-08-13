@@ -23,8 +23,9 @@
 </head>
 
 <body>
-  <button class="settings-btn" id="settings-btn">Settings</button>
-  <div class="settings-panel" id="settings-panel" hidden>
+  <div id="app-status" class="sr-only" role="status" aria-live="polite"></div>
+  <button type="button" class="settings-btn" id="settings-btn" aria-controls="settings-panel" aria-expanded="false">Settings</button>
+  <div class="settings-panel" id="settings-panel" role="dialog" aria-label="Dashboard settings" hidden>
     <h2>Theme</h2>
     <div class="theme-options" id="theme-options"></div>
     <div class="settings-divider"></div>
@@ -70,8 +71,8 @@
         <span class="tasks-count" id="tasks-count"></span>
       </div>
       <div class="task-input-row">
-        <input type="text" id="task-input" placeholder="Add a task and press Enter" />
-        <button id="task-add">Add</button>
+        <input type="text" id="task-input" placeholder="Add a task and press Enter" aria-label="New task" maxlength="160" />
+        <button type="button" id="task-add">Add</button>
       </div>
       <ul class="task-list" id="task-list"></ul>
     </section>
@@ -80,9 +81,9 @@
     <section class="reminders-card" id="reminders" data-widget="reminders" data-widget-label="Reminders">
       <h2>Reminders</h2>
       <div class="reminder-input-row">
-        <input type="text" id="reminder-text" placeholder="Remind me to..." />
-        <input type="datetime-local" id="reminder-time" />
-        <button id="reminder-add">Add</button>
+        <input type="text" id="reminder-text" placeholder="Remind me to..." aria-label="Reminder description" maxlength="160" />
+        <input type="datetime-local" id="reminder-time" aria-label="Reminder date and time" />
+        <button type="button" id="reminder-add">Add</button>
       </div>
       <ul class="reminder-list" id="reminder-list"></ul>
     </section>
@@ -91,11 +92,11 @@
     <section class="grocery-card" id="grocery" data-widget="grocery" data-widget-label="Grocery">
       <div class="grocery-header">
         <h2>Grocery</h2>
-        <button id="grocery-clear" class="grocery-clear">Clear checked</button>
+        <button type="button" id="grocery-clear" class="grocery-clear">Clear checked</button>
       </div>
       <div class="grocery-input-row">
-        <input type="text" id="grocery-input" placeholder="Add an item and press Enter" />
-        <button id="grocery-add">Add</button>
+        <input type="text" id="grocery-input" placeholder="Add an item and press Enter" aria-label="New grocery item" maxlength="120" />
+        <button type="button" id="grocery-add">Add</button>
       </div>
       <ul class="grocery-list" id="grocery-list"></ul>
     </section>
@@ -105,13 +106,13 @@
       <div class="focus-header"><h2>Focus</h2></div>
       <div class="focus-time" id="focus-time">25:00</div>
       <div class="focus-presets">
-        <button data-focus-min="25" class="active">25 min</button>
-        <button data-focus-min="15">15 min</button>
-        <button data-focus-min="5">5 min</button>
+        <button type="button" data-focus-min="25" class="active" aria-pressed="true">25 min</button>
+        <button type="button" data-focus-min="15" aria-pressed="false">15 min</button>
+        <button type="button" data-focus-min="5" aria-pressed="false">5 min</button>
       </div>
       <div class="focus-controls">
-        <button id="focus-start" class="focus-primary">Start</button>
-        <button id="focus-reset">Reset</button>
+        <button type="button" id="focus-start" class="focus-primary">Start</button>
+        <button type="button" id="focus-reset">Reset</button>
       </div>
     </section>
 
@@ -121,9 +122,9 @@
         <div class="exp-title-group">
           <h2>Expenses</h2>
           <div class="exp-month">
-            <button id="exp-prev">Prev</button>
+            <button type="button" id="exp-prev" aria-label="Previous month">Prev</button>
             <span id="exp-title">Month</span>
-            <button id="exp-next">Next</button>
+            <button type="button" id="exp-next" aria-label="Next month">Next</button>
           </div>
         </div>
         <div class="exp-total-group">
@@ -133,10 +134,10 @@
       </div>
 
       <div class="exp-input-row">
-        <input type="number" id="exp-amount" placeholder="Amount" step="0.01" min="0" />
-        <select id="exp-category"></select>
-        <input type="date" id="exp-date" />
-        <button id="exp-add">Add</button>
+        <input type="number" id="exp-amount" placeholder="Amount" step="0.01" min="0.01" aria-label="Expense amount" />
+        <select id="exp-category" aria-label="Expense category"></select>
+        <input type="date" id="exp-date" aria-label="Expense date" />
+        <button type="button" id="exp-add">Add</button>
       </div>
 
       <div class="exp-chart" id="exp-chart"></div>
@@ -147,8 +148,8 @@
     <section class="habits-card" id="habits" data-widget="habits" data-widget-label="Habits">
       <div class="habits-header"><h2>Habits</h2></div>
       <div class="habits-input-row">
-        <input type="text" id="habit-input" placeholder="New habit and press Enter" />
-        <button id="habit-add">Add</button>
+        <input type="text" id="habit-input" placeholder="New habit and press Enter" aria-label="New habit" maxlength="100" />
+        <button type="button" id="habit-add">Add</button>
       </div>
       <div class="habits-list" id="habits-list"></div>
     </section>
@@ -158,9 +159,9 @@
       <div class="links-header"><h2>Quick links</h2></div>
       <div class="links-grid" id="links-grid"></div>
       <div class="links-input-row">
-        <input type="text" id="link-label" placeholder="Label" />
-        <input type="url" id="link-url" placeholder="example.com" />
-        <button id="link-add">Add</button>
+        <input type="text" id="link-label" placeholder="Label" aria-label="Link label" maxlength="60" />
+        <input type="url" id="link-url" placeholder="example.com" aria-label="Link URL" />
+        <button type="button" id="link-add">Add</button>
       </div>
     </section>
 
@@ -169,9 +170,9 @@
       <div class="cal-header">
         <h2 id="cal-title">Calendar</h2>
         <div class="cal-nav">
-          <button id="cal-prev">Prev</button>
-          <button id="cal-today">Today</button>
-          <button id="cal-next">Next</button>
+          <button type="button" id="cal-prev" aria-label="Previous month">Prev</button>
+          <button type="button" id="cal-today">Today</button>
+          <button type="button" id="cal-next" aria-label="Next month">Next</button>
         </div>
       </div>
       <div class="cal-grid" id="cal-grid"></div>

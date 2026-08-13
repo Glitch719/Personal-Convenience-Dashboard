@@ -1,4 +1,5 @@
 import { loadJSON, saveJSON } from "../storage.js";
+import { createId, reportStatus } from "../utils.js";
 
 const LINKS_KEY = "dashboard.links";
 
@@ -18,7 +19,7 @@ export function initLinks() {
   }
 
   function add(label, url) {
-    links.push({ id: Date.now().toString(), label: label, url: url });
+    links.push({ id: createId(), label: label, url: url });
     save(); render();
   }
   function remove(id) {
@@ -47,6 +48,7 @@ export function initLinks() {
       del.className = "link-del";
       del.textContent = "\u00D7";
       del.title = "Remove";
+      del.setAttribute("aria-label", "Remove link: " + l.label);
       del.addEventListener("click", function () { remove(l.id); });
 
       chip.append(a, del);
@@ -57,8 +59,16 @@ export function initLinks() {
   function submit() {
     const label = labelInput.value.trim();
     const url = urlInput.value.trim();
-    if (!label || !url) return;
-    add(label, normalizeUrl(url));
+    if (!label) return reportStatus("Enter a label for the link.", labelInput);
+    if (!url) return reportStatus("Enter a URL for the link.", urlInput);
+    let normalized;
+    try {
+      normalized = new URL(normalizeUrl(url));
+      if (!/^https?:$/.test(normalized.protocol)) throw new Error("unsupported protocol");
+    } catch (err) {
+      return reportStatus("Enter a valid web address.", urlInput);
+    }
+    add(label, normalized.href);
     labelInput.value = "";
     urlInput.value = "";
     labelInput.focus();

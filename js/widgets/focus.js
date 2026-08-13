@@ -13,6 +13,7 @@ export function initFocus() {
   let remaining   = durationSec;
   let running     = false;
   let ticker      = null;      // the setInterval handle, or null when paused
+  let endsAt      = null;
 
   function format(totalSec) {
     const m = Math.floor(totalSec / 60);
@@ -29,7 +30,9 @@ export function initFocus() {
     if (remaining <= 0) remaining = durationSec;
     display.classList.remove("done");
     running = true;
+    endsAt = Date.now() + remaining * 1000;
     startBtn.textContent = "Pause";
+    startBtn.setAttribute("aria-pressed", "true");
 
     // Ask for notification permission the first time, like reminders do.
     if ("Notification" in window && Notification.permission === "default") {
@@ -37,7 +40,7 @@ export function initFocus() {
     }
 
     ticker = setInterval(function () {
-      remaining--;
+      remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
       updateDisplay();
       if (remaining <= 0) finish();
     }, 1000);
@@ -46,6 +49,7 @@ export function initFocus() {
   function pause() {
     running = false;
     startBtn.textContent = "Start";
+    startBtn.setAttribute("aria-pressed", "false");
     clearInterval(ticker);   // stop the countdown
     ticker = null;
   }
@@ -72,6 +76,7 @@ export function initFocus() {
     reset();
     presets.forEach(function (b) {
       b.classList.toggle("active", Number(b.getAttribute("data-focus-min")) === min);
+      b.setAttribute("aria-pressed", String(Number(b.getAttribute("data-focus-min")) === min));
     });
   }
 
@@ -86,5 +91,12 @@ export function initFocus() {
     });
   });
 
+  startBtn.setAttribute("aria-pressed", "false");
+  document.addEventListener("visibilitychange", function () {
+    if (running && !document.hidden) {
+      remaining = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      if (remaining === 0) finish(); else updateDisplay();
+    }
+  });
   updateDisplay();
 }

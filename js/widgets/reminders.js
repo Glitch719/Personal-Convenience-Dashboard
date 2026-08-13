@@ -1,5 +1,5 @@
 import { loadJSON, saveJSON } from "../storage.js";
-import { formatRelative } from "../utils.js";
+import { createId, formatRelative, reportStatus } from "../utils.js";
 import { state } from "../state.js";
 
 const REMINDERS_KEY = "dashboard.reminders";
@@ -27,7 +27,7 @@ export function initReminders() {
 
   function addReminder(text, whenMs) {
     reminders.push({
-      id: Date.now().toString(),
+      id: createId(),
       text: text,
       time: whenMs,                    // stored as a millisecond timestamp (a number)
       notified: whenMs <= Date.now(),  // if it's already past, don't fire on arrival
@@ -79,6 +79,7 @@ export function initReminders() {
       del.className = "reminder-del";
       del.textContent = "\u00D7";
       del.title = "Delete";
+      del.setAttribute("aria-label", "Delete reminder: " + r.text);
       del.addEventListener("click", function () { deleteReminder(r.id); });
 
       li.append(main, del);
@@ -89,10 +90,11 @@ export function initReminders() {
   function submit() {
     const text = textInput.value.trim();
     const when = timeInput.value;              // e.g. "2026-08-09T14:30"
-    if (!text || !when) return;
+    if (!text) return reportStatus("Enter what you want to be reminded about.", textInput);
+    if (!when) return reportStatus("Choose a reminder date and time.", timeInput);
 
     const whenMs = new Date(when).getTime();   // string -> timestamp
-    if (Number.isNaN(whenMs)) return;          // guard against a bad value
+    if (Number.isNaN(whenMs)) return reportStatus("Choose a valid reminder date and time.", timeInput);
 
     // The browser only shows the permission prompt in response to a click,
     // so this is the right moment to ask.

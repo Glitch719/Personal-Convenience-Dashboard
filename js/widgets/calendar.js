@@ -1,5 +1,6 @@
 import { loadJSON, saveJSON } from "../storage.js";
 import { state } from "../state.js";
+import { createId, reportStatus } from "../utils.js";
 
 const EVENTS_KEY = "dashboard.events";
 
@@ -61,7 +62,7 @@ export function initCalendar() {
   /* ---------- event operations ---------- */
 
   function addEvent(key, title, time) {
-    events.push({ id: Date.now().toString(), date: key, time: time || "", title: title, notes: "" });
+    events.push({ id: createId(), date: key, time: time || "", title: title, notes: "" });
     save();
     publishNextEvent();
     renderCalendar();
@@ -193,7 +194,7 @@ export function initCalendar() {
 
     function submit() {
       const title = titleInput.value.trim();
-      if (!title) return;
+      if (!title) return reportStatus("Enter an event title first.", titleInput);
       addEvent(selectedDate, title, timeInput.value);
     }
     addBtn.addEventListener("click", submit);

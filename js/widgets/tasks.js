@@ -1,5 +1,6 @@
 import { loadJSON, saveJSON } from "../storage.js";
 import { state } from "../state.js";
+import { createId, reportStatus } from "../utils.js";
 
 const TASKS_KEY = "dashboard.tasks";
 
@@ -14,7 +15,7 @@ export function initTasks() {
 
   // Each operation follows the same rhythm: change state, save, re-render.
   function addTask(text) {
-    tasks.push({ id: Date.now().toString(), text: text, done: false });
+    tasks.push({ id: createId(), text: text, done: false });
     saveJSON(TASKS_KEY, tasks);
     render();
   }
@@ -56,6 +57,7 @@ export function initTasks() {
         del.className = "task-del";
         del.textContent = "\u00D7";
         del.title = "Delete";
+        del.setAttribute("aria-label", "Delete task: " + task.text);
         del.addEventListener("click", function () { deleteTask(task.id); });
 
         li.append(box, text, del);
@@ -78,7 +80,7 @@ export function initTasks() {
 
   function submit() {
     const text = input.value.trim();
-    if (!text) return;
+    if (!text) return reportStatus("Enter a task first.", input);
     addTask(text);
     input.value = "";
     input.focus();

@@ -30,6 +30,7 @@ export function initSettings() {
   function apply() {
     widgets.forEach(function (w) {
       w.el.classList.toggle("widget-hidden", !isVisible(w.id));
+      w.el.setAttribute("aria-hidden", String(!isVisible(w.id)));
     });
   }
 
@@ -59,12 +60,26 @@ export function initSettings() {
   // Open/close the panel.
   btn.addEventListener("click", function () {
     panel.hidden = !panel.hidden;
+    btn.setAttribute("aria-expanded", String(!panel.hidden));
+    if (!panel.hidden) {
+      const firstControl = panel.querySelector("button, input");
+      if (firstControl) firstControl.focus();
+    }
   });
 
   // Close when clicking anywhere outside the panel or the button.
   document.addEventListener("click", function (e) {
     if (!panel.hidden && !panel.contains(e.target) && e.target !== btn) {
       panel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !panel.hidden) {
+      panel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      btn.focus();
     }
   });
 

@@ -1,6 +1,7 @@
 import { loadJSON, saveJSON } from "../storage.js";
 import { CURRENCY, EXPENSE_CATEGORIES } from "../config.js";
 import { state } from "../state.js";
+import { createId, reportStatus } from "../utils.js";
 
 const EXPENSES_KEY = "dashboard.expenses";
 const monthFmt = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" });
@@ -56,7 +57,7 @@ export function initExpenses() {
   }
 
   function addEntry(amount, category, date) {
-    entries.push({ id: Date.now().toString(), amount: amount, category: category, date: date });
+    entries.push({ id: createId(), amount: amount, category: category, date: date });
     save(); publishSummary(); render();
   }
 
@@ -150,6 +151,7 @@ export function initExpenses() {
       del.className = "exp-del";
       del.textContent = "\u00D7";
       del.title = "Delete";
+      del.setAttribute("aria-label", "Delete " + money(e.amount) + " " + e.category + " expense from " + e.date);
       del.addEventListener("click", function () { deleteEntry(e.id); });
 
       li.append(left, amount, del);
@@ -161,7 +163,7 @@ export function initExpenses() {
     const amount = parseFloat(amountInput.value);   // text input -> number
     const category = catSelect.value;
     const date = dateInput.value || todayStr();
-    if (!(amount > 0)) return;                       // ignore blank, zero, negative, NaN
+    if (!(amount > 0)) return reportStatus("Enter an expense amount greater than zero.", amountInput);
     addEntry(amount, category, date);
     amountInput.value = "";
     amountInput.focus();

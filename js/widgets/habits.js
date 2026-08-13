@@ -1,4 +1,5 @@
 import { loadJSON, saveJSON } from "../storage.js";
+import { createId, reportStatus } from "../utils.js";
 
 const HABITS_KEY = "dashboard.habits";
 
@@ -18,7 +19,7 @@ export function initHabits() {
   function save() { saveJSON(HABITS_KEY, habits); }
 
   function addHabit(name) {
-    habits.push({ id: Date.now().toString(), name: name, dates: [] });
+    habits.push({ id: createId(), name: name, dates: [] });
     save(); render();
   }
   function removeHabit(id) {
@@ -90,6 +91,7 @@ export function initHabits() {
       del.className = "habit-del";
       del.textContent = "\u00D7";
       del.title = "Remove habit";
+      del.setAttribute("aria-label", "Remove habit: " + h.name);
       del.addEventListener("click", function () { removeHabit(h.id); });
 
       head.append(name, streakEl, del);
@@ -102,6 +104,8 @@ export function initHabits() {
         btn.className = "habit-day" + (doneSet.has(key) ? " done" : "");
         btn.textContent = d.toLocaleDateString("en-GB", { weekday: "narrow" });
         btn.title = key;
+        btn.setAttribute("aria-label", h.name + " on " + key);
+        btn.setAttribute("aria-pressed", String(doneSet.has(key)));
         btn.addEventListener("click", function () { toggleDay(h.id, key); });
         daysRow.appendChild(btn);
       });
@@ -113,7 +117,7 @@ export function initHabits() {
 
   function submit() {
     const name = input.value.trim();
-    if (!name) return;
+    if (!name) return reportStatus("Enter a habit first.", input);
     addHabit(name);
     input.value = "";
     input.focus();

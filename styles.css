@@ -7,6 +7,28 @@
   --font-display: "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:where(button, input, select, textarea, a):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+input[aria-invalid="true"] {
+  border-color: #dc5252 !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #dc5252 22%, transparent);
+}
+
 /* ===== Theme: Bold (default) ===== */
 :root,
 [data-theme="bold"] {
