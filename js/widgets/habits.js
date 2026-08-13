@@ -1,4 +1,5 @@
-import { loadJSON, saveJSON } from "../storage.js";
+import { loadArray, saveJSON } from "../storage.js";
+import { createId, reportStatus } from "../utils.js";
 
 const HABITS_KEY = "dashboard.habits";
 
@@ -10,15 +11,16 @@ function dayKey(d) {
 }
 
 export function initHabits() {
-  let habits = loadJSON(HABITS_KEY, []);
+  let habits = loadArray(HABITS_KEY);
 
   const input  = document.getElementById("habit-input");
   const listEl = document.getElementById("habits-list");
+  const progressEl = document.getElementById("habits-progress");
 
   function save() { saveJSON(HABITS_KEY, habits); }
 
   function addHabit(name) {
-    habits.push({ id: Date.now().toString(), name: name, dates: [] });
+    habits.push({ id: createId(), name: name, dates: [] });
     save(); render();
   }
   function removeHabit(id) {
@@ -60,6 +62,9 @@ export function initHabits() {
 
   function render() {
     listEl.innerHTML = "";
+    const today = dayKey(new Date());
+    const doneToday = habits.filter(function (habit) { return habit.dates.includes(today); }).length;
+    progressEl.textContent = habits.length ? doneToday + " of " + habits.length + " done today" : "";
     if (habits.length === 0) {
       listEl.innerHTML = '<p class="habits-empty">No habits yet. Add one above.</p>';
       return;
@@ -90,6 +95,7 @@ export function initHabits() {
       del.className = "habit-del";
       del.textContent = "\u00D7";
       del.title = "Remove habit";
+      del.setAttribute("aria-label", "Remove habit: " + h.name);
       del.addEventListener("click", function () { removeHabit(h.id); });
 
       head.append(name, streakEl, del);
@@ -102,6 +108,8 @@ export function initHabits() {
         btn.className = "habit-day" + (doneSet.has(key) ? " done" : "");
         btn.textContent = d.toLocaleDateString("en-GB", { weekday: "narrow" });
         btn.title = key;
+        btn.setAttribute("aria-label", h.name + " on " + key);
+        btn.setAttribute("aria-pressed", String(doneSet.has(key)));
         btn.addEventListener("click", function () { toggleDay(h.id, key); });
         daysRow.appendChild(btn);
       });
@@ -113,7 +121,10 @@ export function initHabits() {
 
   function submit() {
     const name = input.value.trim();
-    if (!name) return;
+    if (!name) return reportStatus("Enter a habit first.", input);
+    if (habits.some(function (habit) { return habit.name.toLowerCase() === name.toLowerCase(); })) {
+      return reportStatus("That habit already exists.", input);
+    }
     addHabit(name);
     input.value = "";
     input.focus();

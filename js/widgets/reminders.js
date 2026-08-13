@@ -1,5 +1,5 @@
-import { loadJSON, saveJSON } from "../storage.js";
-import { formatRelative } from "../utils.js";
+import { loadArray, saveJSON } from "../storage.js";
+import { createId, formatRelative, reportStatus } from "../utils.js";
 import { state } from "../state.js";
 
 const REMINDERS_KEY = "dashboard.reminders";
@@ -17,17 +17,23 @@ function formatAbsolute(ms) {
 
 export function initReminders() {
   // Reuses the exact same storage helpers the tasks widget uses.
-  let reminders = loadJSON(REMINDERS_KEY, []);
+  let reminders = loadArray(REMINDERS_KEY);
 
   const textInput = document.getElementById("reminder-text");
   const timeInput = document.getElementById("reminder-time");
   const list      = document.getElementById("reminder-list");
 
+  function toInputValue(date) {
+    return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" +
+      String(date.getDate()).padStart(2, "0") + "T" + String(date.getHours()).padStart(2, "0") + ":" +
+      String(date.getMinutes()).padStart(2, "0");
+  }
+
   function save() { saveJSON(REMINDERS_KEY, reminders); }
 
   function addReminder(text, whenMs) {
     reminders.push({
-      id: Date.now().toString(),
+      id: createId(),
       text: text,
       time: whenMs,                    // stored as a millisecond timestamp (a number)
       notified: whenMs <= Date.now(),  // if it's already past, don't fire on arrival
@@ -38,6 +44,15 @@ export function initReminders() {
 
   function deleteReminder(id) {
     reminders = reminders.filter(function (r) { return r.id !== id; });
+    save();
+    render();
+  }
+
+  function snooze(id, minutes) {
+    const reminder = reminders.find(function (r) { return r.id === id; });
+    if (!reminder) return;
+    reminder.time = Date.now() + minutes * 60000;
+    reminder.notified = false;
     save();
     render();
   }
@@ -79,9 +94,19 @@ export function initReminders() {
       del.className = "reminder-del";
       del.textContent = "\u00D7";
       del.title = "Delete";
+      del.setAttribute("aria-label", "Delete reminder: " + r.text);
       del.addEventListener("click", function () { deleteReminder(r.id); });
 
-      li.append(main, del);
+      const actions = document.createElement("div");
+      actions.className = "reminder-actions";
+      const snoozeBtn = document.createElement("button");
+      snoozeBtn.className = "reminder-snooze";
+      snoozeBtn.textContent = "10m";
+      snoozeBtn.setAttribute("aria-label", "Snooze " + r.text + " for 10 minutes");
+      snoozeBtn.addEventListener("click", function () { snooze(r.id, 10); });
+      actions.append(snoozeBtn, del);
+
+      li.append(main, actions);
       list.appendChild(li);
     });
   }
@@ -89,10 +114,12 @@ export function initReminders() {
   function submit() {
     const text = textInput.value.trim();
     const when = timeInput.value;              // e.g. "2026-08-09T14:30"
-    if (!text || !when) return;
+    if (!text) return reportStatus("Enter what you want to be reminded about.", textInput);
+    if (!when) return reportStatus("Choose a reminder date and time.", timeInput);
 
     const whenMs = new Date(when).getTime();   // string -> timestamp
-    if (Number.isNaN(whenMs)) return;          // guard against a bad value
+    if (Number.isNaN(whenMs)) return reportStatus("Choose a valid reminder date and time.", timeInput);
+    if (whenMs <= Date.now()) return reportStatus("Choose a reminder time in the future.", timeInput);
 
     // The browser only shows the permission prompt in response to a click,
     // so this is the right moment to ask.
@@ -134,6 +161,16 @@ export function initReminders() {
   document.getElementById("reminder-add").addEventListener("click", submit);
   textInput.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
 
+  document.querySelectorAll("[data-reminder-min]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const minutes = Number(button.getAttribute("data-reminder-min"));
+      timeInput.value = toInputValue(new Date(Date.now() + minutes * 60000));
+      timeInput.removeAttribute("aria-invalid");
+      textInput.focus();
+    });
+  });
+
+  timeInput.min = toInputValue(new Date());
   render();
   setInterval(checkDue, 15000);
 }

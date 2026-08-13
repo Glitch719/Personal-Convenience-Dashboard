@@ -1,7 +1,9 @@
 import { NEWS_FEEDS } from "../config.js";
 import { formatRelative } from "../utils.js";
+import { loadJSON, saveJSON } from "../storage.js";
 
 const MAX_ARTICLES = 12;   // how many headlines to show after merging feeds
+const NEWS_CACHE_KEY = "dashboard.newsCache";
 
 // Shimmer placeholder shown while the first load is in flight.
 const NEWS_SKELETON = Array.from({ length: 5 }).map(function () {
@@ -80,10 +82,21 @@ async function fetchFeed(feed) {
 
 export function initNews() {
   const listEl = document.getElementById("news-list");
+  const refreshBtn = document.getElementById("news-refresh");
+  const updatedEl = document.getElementById("news-updated");
+  let cached = loadJSON(NEWS_CACHE_KEY, null);
 
-  let firstLoad = true;
+  let firstLoad = !(cached && Array.isArray(cached.articles) && cached.articles.length);
+
+  if (!firstLoad) {
+    render(cached.articles);
+    updatedEl.textContent = "Saved " + formatRelative(cached.fetchedAt);
+  }
 
   async function load() {
+    if (refreshBtn.disabled) return;
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "Refreshing...";
     if (firstLoad) {
       listEl.innerHTML = NEWS_SKELETON;   // shimmer only on the initial load
       firstLoad = false;
@@ -96,20 +109,37 @@ export function initNews() {
     const articles = [];
     results.forEach(function (r, i) {
       if (r.status === "fulfilled") {
-        r.value.forEach(function (a) { if (a.title && a.link) articles.push(a); });
+        r.value.forEach(function (a) {
+          try {
+            const url = new URL(a.link);
+            if (a.title && /^https?:$/.test(url.protocol)) articles.push(Object.assign({}, a, { link: url.href }));
+          } catch (err) {}
+        });
       } else {
         console.error("[news] feed failed:", NEWS_FEEDS[i].name, r.reason);
       }
     });
 
     if (articles.length === 0) {
-      listEl.innerHTML =
-        '<li class="news-error">Could not load news right now. The proxies may be down or rate-limited; try again shortly.</li>';
+      if (!cached || !Array.isArray(cached.articles) || !cached.articles.length) {
+        listEl.innerHTML = '<li class="news-error">Could not load news right now. Try again shortly.</li>';
+      }
+      updatedEl.textContent = cached ? "Offline \u00B7 showing saved headlines" : "Unable to reach news sources";
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = "Refresh";
       return;
     }
 
     articles.sort(function (a, b) { return b.date - a.date; });   // newest first
-    render(articles.slice(0, MAX_ARTICLES));
+    const unique = Array.from(new Map(articles.map(function (a) { return [a.link, a]; })).values())
+      .slice(0, MAX_ARTICLES);
+    render(unique);
+    const fetchedAt = Date.now();
+    cached = { articles: unique, fetchedAt: fetchedAt };
+    saveJSON(NEWS_CACHE_KEY, cached);
+    updatedEl.textContent = unique.length + " headlines \u00B7 updated just now";
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = "Refresh";
   }
 
   function render(articles) {
@@ -134,6 +164,7 @@ export function initNews() {
     });
   }
 
+  refreshBtn.addEventListener("click", load);
   load();
   setInterval(load, 15 * 60 * 1000);   // refresh every 15 minutes
 }

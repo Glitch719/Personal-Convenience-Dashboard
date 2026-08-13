@@ -12,6 +12,7 @@ export const THEMES = [
 
 export function initTheme() {
   let current = loadJSON(THEME_KEY, "bold");
+  if (!THEMES.some(function (theme) { return theme.id === current; })) current = "bold";
   applyTheme(current);
 
   function applyTheme(id) {
@@ -24,13 +25,16 @@ export function initTheme() {
 
   THEMES.forEach(function (t) {
     const btn = document.createElement("button");
+    btn.type = "button";
     btn.className = "theme-option" + (t.id === current ? " active" : "");
+    btn.setAttribute("aria-pressed", String(t.id === current));
     btn.textContent = t.label;
     btn.addEventListener("click", function () {
       applyTheme(t.id);
       saveJSON(THEME_KEY, t.id);
       container.querySelectorAll(".theme-option").forEach(function (b) {
         b.classList.toggle("active", b === btn);
+        b.setAttribute("aria-pressed", String(b === btn));
       });
     });
     container.appendChild(btn);

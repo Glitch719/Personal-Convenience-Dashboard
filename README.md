@@ -1,56 +1,67 @@
 # Daily Dashboard
 
-A personal dashboard and planner that brings your day into one place: time across
-multiple locations, live weather, and (in progress) news, calendar, reminders,
-notes, and more. Built to run in the browser now, and to be packaged as a
-downloadable desktop app later.
+A privacy-friendly personal dashboard that brings planning, routines, time,
+weather, news, and lightweight money tracking into one responsive browser app.
+It is built with plain HTML, CSS, and JavaScript to demonstrate accessible UI,
+resilient client-side state, and maintainable modular code without a framework.
 
-The guiding idea is that the widgets talk to each other. A calendar event can
-carry prep notes, the greeting reflects the current weather, and so on, rather
-than being a set of boxes that ignore each other.
+## What it can do
 
-## Status
+- Summarize today across weather, calendar, tasks, spending, and reminders
+- Show live weather with manual refresh and an offline last-known-data fallback
+- Track world clocks in 12-hour or 24-hour format
+- Plan tasks with priorities, due dates, filters, and overdue highlighting
+- Schedule reminders with quick times, notifications, and snoozing
+- Manage a grocery list with duplicate prevention and progress counts
+- Run a reload-safe focus timer that stays accurate while the tab is asleep
+- Track categorized expenses, monthly budgets, descriptions, and CSV exports
+- Build habits with a seven-day view, daily progress, and streaks
+- Create and edit validated quick links
+- Plan calendar events with optional times and autosaved preparation notes
+- Merge configurable news feeds with caching, deduplication, and safe links
+- Personalize the greeting, theme, and visible widgets
+- Export or restore all dashboard data from a JSON backup
 
-Early build. Working so far:
+All personal data stays in browser storage. Weather comes from Open-Meteo, and
+news uses the RSS sources in `js/config.js` through public CORS proxies.
 
-- Multi-location clock with a day/night indicator
-- Live weather (via Open-Meteo, no API key needed)
+## Run locally
 
-Planned: news, calendar with per-event notes, reminders, tasks, mail, notes,
-and a Spotify embed.
+The app uses JavaScript modules, so serve the folder instead of opening the HTML
+file directly. Any local static server works. For example:
 
-## Running it locally
-
-No build step yet. You need a browser and, ideally, a local server.
-
-1. Clone the repo and open the folder in VS Code.
-2. Install the "Live Server" extension.
-3. Right-click `index.html` -> "Open with Live Server".
-
-The page will open on localhost and reload automatically when you save a file.
-
-## Making it yours
-
-All the settings live at the top of `app.js`:
-
-- `LOCATIONS` controls which clocks appear.
-- `WEATHER_LOCATION` sets the coordinates used for weather.
-
-## Contributing
-
-Work on a branch, not on `main`:
-
-```
-git checkout -b my-feature
-# make changes, then
-git add .
-git commit -m "Describe what you did"
-git push -u origin my-feature
+```powershell
+python -m http.server 4173
 ```
 
-Then open a Pull Request on GitHub for review.
+Then open `http://localhost:4173`.
 
-## Tech
+## Test
 
-Plain HTML, CSS, and JavaScript for now. No frameworks yet; React comes in once
-the hand-written DOM updates get heavy.
+No dependencies are required:
+
+```powershell
+node --test
+```
+
+The tests cover persistence and backup safety, generated IDs, configuration,
+relative time behavior, duplicate HTML IDs, and JavaScript-to-HTML element
+contracts. JavaScript syntax is also compatible with `node --check`.
+
+## Customize
+
+Edit `js/config.js` to change:
+
+- `LOCATIONS` for world clocks and the local greeting timezone
+- `WEATHER_LOCATION` for weather coordinates
+- `NEWS_FEEDS` for RSS/Atom sources
+- `CURRENCY` and `EXPENSE_CATEGORIES` for expense tracking
+
+The Settings panel handles the user-facing name, theme, widget visibility, and
+data backup without code changes.
+
+## Architecture
+
+Each widget owns its DOM and persisted records in `js/widgets/`. Shared storage,
+formatting helpers, configuration, and live summary snapshots remain separate,
+so one widget can fail without taking down the rest of the dashboard.
