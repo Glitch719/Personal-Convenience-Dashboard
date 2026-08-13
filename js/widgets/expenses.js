@@ -1,7 +1,7 @@
 import { loadArray, loadJSON, saveJSON } from "../storage.js";
 import { CURRENCY, EXPENSE_CATEGORIES } from "../config.js";
 import { state } from "../state.js";
-import { createId, reportStatus } from "../utils.js";
+import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 
 const EXPENSES_KEY = "dashboard.expenses";
 const BUDGET_KEY = "dashboard.expenseBudget";
@@ -68,8 +68,15 @@ export function initExpenses() {
   }
 
   function deleteEntry(id) {
-    entries = entries.filter(function (e) { return e.id !== id; });
+    const index = entries.findIndex(function (entry) { return entry.id === id; });
+    if (index === -1) return;
+    const removed = [{ index: index, item: entries[index] }];
+    entries.splice(index, 1);
     save(); publishSummary(); render();
+    offerUndo("Expense deleted.", function () {
+      entries = restoreRemovedItems(entries, removed);
+      save(); publishSummary(); render();
+    }, "Expense restored.");
   }
 
   function render() {

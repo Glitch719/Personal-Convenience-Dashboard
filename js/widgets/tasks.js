@@ -1,6 +1,6 @@
 import { loadArray, saveJSON } from "../storage.js";
 import { state } from "../state.js";
-import { createId, reportStatus } from "../utils.js";
+import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 
 const TASKS_KEY = "dashboard.tasks";
 
@@ -38,15 +38,31 @@ export function initTasks() {
   }
 
   function deleteTask(id) {
-    tasks = tasks.filter(function (t) { return t.id !== id; });
+    const index = tasks.findIndex(function (task) { return task.id === id; });
+    if (index === -1) return;
+    const removed = [{ index: index, item: tasks[index] }];
+    tasks.splice(index, 1);
     saveJSON(TASKS_KEY, tasks);
     render();
+    offerUndo("Task deleted.", function () {
+      tasks = restoreRemovedItems(tasks, removed);
+      saveJSON(TASKS_KEY, tasks);
+      render();
+    }, "Task restored.");
   }
 
   function clearCompleted() {
+    const removed = tasks.map(function (task, index) { return { index: index, item: task }; })
+      .filter(function (entry) { return entry.item.done; });
+    if (removed.length === 0) return;
     tasks = tasks.filter(function (task) { return !task.done; });
     saveJSON(TASKS_KEY, tasks);
     render();
+    offerUndo(removed.length + " completed task" + (removed.length === 1 ? "" : "s") + " cleared.", function () {
+      tasks = restoreRemovedItems(tasks, removed);
+      saveJSON(TASKS_KEY, tasks);
+      render();
+    }, "Completed tasks restored.");
   }
 
   function visibleTasks() {

@@ -1,5 +1,5 @@
 import { loadArray, saveJSON } from "../storage.js";
-import { createId, reportStatus } from "../utils.js";
+import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 
 const LINKS_KEY = "dashboard.links";
 
@@ -26,8 +26,15 @@ export function initLinks() {
     save(); render();
   }
   function remove(id) {
-    links = links.filter(function (l) { return l.id !== id; });
+    const index = links.findIndex(function (link) { return link.id === id; });
+    if (index === -1) return;
+    const removed = [{ index: index, item: links[index] }];
+    links.splice(index, 1);
     save(); render();
+    offerUndo("Quick link removed.", function () {
+      links = restoreRemovedItems(links, removed);
+      save(); render();
+    }, "Quick link restored.");
   }
 
   function edit(link) {

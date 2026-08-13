@@ -22,6 +22,7 @@ resilient client-side state, and maintainable modular code without a framework.
 - Personalize the greeting, theme, and visible widgets
 - Reorder widgets by dragging or keyboard controls, collapse cards, and choose
   comfortable or compact density; the layout persists across reloads
+- Undo accidental deletions and bulk clears across every editable data widget
 - Export or restore all dashboard data from a JSON backup
 
 ## Design direction
@@ -59,9 +60,9 @@ No dependencies are required:
 node --test
 ```
 
-The tests cover persistence and backup safety, generated IDs, configuration,
-relative time behavior, duplicate HTML IDs, and JavaScript-to-HTML element
-contracts. JavaScript syntax is also compatible with `node --check`.
+The tests cover persistence and backup safety, undo restoration, generated IDs,
+configuration, relative time behavior, duplicate HTML IDs, and JavaScript-to-HTML
+element contracts. JavaScript syntax is also compatible with `node --check`.
 
 ## Customize
 
