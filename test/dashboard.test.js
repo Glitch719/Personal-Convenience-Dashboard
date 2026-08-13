@@ -19,6 +19,7 @@ const { exportDashboardData, importDashboardData, loadArray, loadJSON, loadObjec
 const { createId, formatRelative, isValidTimeZone } = await import("../js/utils.js");
 const { LOCATIONS, NEWS_FEEDS } = await import("../js/config.js");
 const { remainingSecondsUntil } = await import("../js/widgets/focus.js");
+const { moveInOrder, normalizeOrder } = await import("../js/widgets/layout.js");
 
 test("storage round-trips dashboard data", function () {
   localStorage.clear();
@@ -64,6 +65,15 @@ test("focus timer derives reload-safe remaining time from its end timestamp", fu
   assert.equal(remainingSecondsUntil(now + 90_000, now), 90);
   assert.equal(remainingSecondsUntil(now + 1, now), 1);
   assert.equal(remainingSecondsUntil(now - 1, now), 0);
+});
+
+test("saved widget layouts are normalized and movable", function () {
+  assert.deepEqual(
+    normalizeOrder(["tasks", "tasks", "missing"], ["weather", "tasks", "focus"]),
+    ["tasks", "weather", "focus"],
+  );
+  assert.deepEqual(moveInOrder(["weather", "tasks", "focus"], "focus", -1), ["weather", "focus", "tasks"]);
+  assert.deepEqual(moveInOrder(["weather", "tasks", "focus"], "weather", -1), ["weather", "tasks", "focus"]);
 });
 
 test("configured timezones and feed URLs are valid", function () {

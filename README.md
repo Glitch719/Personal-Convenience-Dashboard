@@ -20,6 +20,8 @@ resilient client-side state, and maintainable modular code without a framework.
 - Plan calendar events with optional times and autosaved preparation notes
 - Merge configurable news feeds with caching, deduplication, and safe links
 - Personalize the greeting, theme, and visible widgets
+- Reorder widgets by dragging or keyboard controls, collapse cards, and choose
+  comfortable or compact density; the layout persists across reloads
 - Export or restore all dashboard data from a JSON backup
 
 ## Design direction

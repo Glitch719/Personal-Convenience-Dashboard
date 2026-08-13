@@ -20,7 +20,7 @@
 
   <!-- Our styles now live in their own file. -->
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="redesign.css?v=1" />
+  <link rel="stylesheet" href="redesign.css?v=2" />
 </head>
 
 <body>
@@ -34,6 +34,17 @@
     <div class="settings-divider"></div>
     <h2>Theme</h2>
     <div class="theme-options" id="theme-options"></div>
+    <div class="settings-divider"></div>
+    <h2>Layout</h2>
+    <div class="density-options" id="density-options" role="group" aria-label="Dashboard density">
+      <button type="button" data-density="comfortable" aria-pressed="true">Comfortable</button>
+      <button type="button" data-density="compact" aria-pressed="false">Compact</button>
+    </div>
+    <div class="layout-actions">
+      <button type="button" id="layout-arrange">Arrange widgets</button>
+      <button type="button" id="layout-reset">Reset layout</button>
+    </div>
+    <p class="settings-help" id="layout-help">Use the arrows below, or arrange cards directly on the dashboard.</p>
     <div class="settings-divider"></div>
     <h2>Widgets</h2>
     <div class="settings-list" id="settings-list"></div>
@@ -279,6 +290,6 @@
 
   <!-- One entry point, loaded as a module so it can import the others. -->
   <!-- type="module" requires a server (Live Server), not a double-clicked file. -->
-  <script type="module" src="js/main.js?v=redesign"></script>
+  <script type="module" src="js/main.js?v=customization2"></script>
 </body>
 </html>

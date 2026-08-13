@@ -115,6 +115,23 @@ body::before {
 }
 .settings-btn span { color: var(--accent); }
 .settings-panel { top: 76px; right: max(20px, calc((100vw - 1440px) / 2 + 32px)); border-color: var(--border-strong); backdrop-filter: blur(24px); }
+.density-options, .layout-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.density-options { margin-bottom: 7px; }
+.density-options button, .layout-actions button {
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+  border-radius: 8px; padding: 7px 5px; font-size: 10px; cursor: pointer;
+}
+.density-options button[aria-pressed="true"], .layout-actions button.active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.settings-help { color: var(--muted); font-size: 10px; line-height: 1.45; margin-top: 8px; }
+.settings-widget-label { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; cursor: pointer; }
+.settings-widget-label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.settings-widget-controls { display: flex; gap: 2px; }
+.settings-widget-controls button {
+  width: 24px; height: 24px; display: grid; place-items: center; border-radius: 6px;
+  border: 1px solid transparent; background: transparent; color: var(--muted); cursor: pointer;
+}
+.settings-widget-controls button:hover { color: var(--text); border-color: var(--border); background: var(--surface-2); }
+.settings-widget-controls button:disabled { opacity: .25; cursor: default; }
 
 .hero {
   display: grid;
@@ -217,6 +234,53 @@ body::before {
   background: var(--widget-accent, var(--accent)); opacity: .8;
 }
 .widget-grid > section:not(.clock-grid):hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.widget-collapsed-summary, .widget-drag-handle { display: none; }
+.widget-grid > section.widget-collapsed {
+  min-height: 0 !important; height: auto !important; padding: 17px 20px !important;
+  overflow: visible;
+}
+.widget-grid > section.widget-collapsed > *:not(.widget-collapsed-summary):not(.widget-drag-handle) { display: none !important; }
+.widget-grid > section.widget-collapsed .widget-collapsed-summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.widget-collapsed-summary strong { font-size: 14px; }
+.widget-collapsed-summary button {
+  background: var(--surface-2); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 7px; padding: 5px 9px; font-size: 10px; cursor: pointer;
+}
+.layout-arranging .widget-grid > section {
+  cursor: grab; outline: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: 3px;
+}
+.layout-arranging .widget-grid > section:hover { transform: translateY(-3px) scale(1.005); }
+.layout-arranging .widget-drag-handle {
+  display: block; position: absolute; z-index: 12; top: 9px; left: 50%; transform: translateX(-50%);
+  border: 1px solid var(--border-strong); border-radius: 999px; padding: 5px 10px 5px 25px;
+  background: var(--surface-2); color: var(--muted); font-size: 9px; letter-spacing: .04em; cursor: grab;
+  touch-action: none;
+  box-shadow: 0 6px 20px rgba(0,0,0,.16);
+}
+.layout-arranging .widget-drag-handle::before { content: "⠿"; position: absolute; left: 9px; color: var(--accent); }
+.layout-arranging .widget-dragging { opacity: .42; cursor: grabbing; }
+
+[data-density="compact"] .widget-grid { gap: 12px; }
+[data-density="compact"] .tasks-card,
+[data-density="compact"] .reminders-card,
+[data-density="compact"] .grocery-card,
+[data-density="compact"] .focus-card,
+[data-density="compact"] .expense-card,
+[data-density="compact"] .habits-card,
+[data-density="compact"] .links-card,
+[data-density="compact"] .calendar-card,
+[data-density="compact"] .news-card { padding: 19px 20px; }
+[data-density="compact"] .weather-card { min-height: 300px; padding: 25px; }
+[data-density="compact"] .focus-card { min-height: 300px; }
+[data-density="compact"] .task,
+[data-density="compact"] .reminder,
+[data-density="compact"] .grocery-item,
+[data-density="compact"] .exp-item,
+[data-density="compact"] .news-item { padding-top: 6px; padding-bottom: 6px; }
+[data-density="compact"] .calendar-card .cal-cell { min-height: 62px; }
 
 #weather { --widget-accent: #78b7ff; background: linear-gradient(130deg, color-mix(in srgb, #78b7ff 14%, transparent), transparent 54%), var(--surface); }
 #tasks { --widget-accent: var(--accent); }
