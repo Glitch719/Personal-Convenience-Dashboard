@@ -52,7 +52,7 @@ export function isValidTimeZone(zone) {
 export function partsFor(zone) {
   const fmt = new Intl.DateTimeFormat("en-GB", {
     timeZone: zone,
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
     weekday: "short", day: "numeric", month: "short",
   });
   const p = {};

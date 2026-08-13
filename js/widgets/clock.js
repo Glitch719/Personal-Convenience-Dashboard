@@ -1,8 +1,13 @@
 import { LOCATIONS } from "../config.js";
 import { isValidTimeZone, partsFor } from "../utils.js";
+import { loadJSON, saveJSON } from "../storage.js";
+
+const CLOCK_FORMAT_KEY = "dashboard.clock24Hour";
 
 export function initClock() {
   const grid = document.getElementById("clock-grid");
+  const formatBtn = document.getElementById("clock-format");
+  let use24Hour = loadJSON(CLOCK_FORMAT_KEY, true) !== false;
 
   // Build one card per location, validating each zone as we go so a bad
   // entry is quarantined to its own card.
@@ -41,10 +46,15 @@ export function initClock() {
       if (!c.valid) return;
       try {
         const p = partsFor(c.loc.zone);
-        const hour = Number(p.hour);
+        const hour = Number(p.hour) % 24;
         const phase = (hour >= 6 && hour < 18) ? "day" : "night";
 
-        c.timeEl.textContent  = p.hour + ":" + p.minute + ":" + p.second;
+        if (use24Hour) {
+          c.timeEl.textContent = p.hour + ":" + p.minute + ":" + p.second;
+        } else {
+          const hour12 = hour % 12 || 12;
+          c.timeEl.textContent = hour12 + ":" + p.minute + ":" + p.second + (hour < 12 ? " AM" : " PM");
+        }
         c.labelEl.textContent = p.weekday + ", " + p.day + " " + p.month;
         c.dotEl.className   = "dot " + phase;
         c.stripEl.className = "daynight-strip " + phase;
@@ -57,6 +67,20 @@ export function initClock() {
     });
   }
 
+  function updateFormatButton() {
+    formatBtn.textContent = use24Hour ? "24-hour" : "12-hour";
+    formatBtn.setAttribute("aria-pressed", String(use24Hour));
+    grid.classList.toggle("twelve-hour", !use24Hour);
+  }
+
+  formatBtn.addEventListener("click", function () {
+    use24Hour = !use24Hour;
+    saveJSON(CLOCK_FORMAT_KEY, use24Hour);
+    updateFormatButton();
+    tick();
+  });
+
+  updateFormatButton();
   tick();
   setInterval(tick, 1000);
 }

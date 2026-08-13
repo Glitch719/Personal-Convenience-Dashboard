@@ -1,0 +1,111 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
+
+class MemoryStorage {
+  constructor() { this.values = new Map(); }
+  get length() { return this.values.size; }
+  key(index) { return Array.from(this.values.keys())[index] ?? null; }
+  getItem(key) { return this.values.has(key) ? this.values.get(key) : null; }
+  setItem(key, value) { this.values.set(String(key), String(value)); }
+  removeItem(key) { this.values.delete(String(key)); }
+  clear() { this.values.clear(); }
+}
+
+globalThis.localStorage = new MemoryStorage();
+
+const { exportDashboardData, importDashboardData, loadArray, loadJSON, loadObject, saveJSON } = await import("../js/storage.js");
+const { createId, formatRelative, isValidTimeZone } = await import("../js/utils.js");
+const { LOCATIONS, NEWS_FEEDS } = await import("../js/config.js");
+const { remainingSecondsUntil } = await import("../js/widgets/focus.js");
+
+test("storage round-trips dashboard data", function () {
+  localStorage.clear();
+  saveJSON("dashboard.tasks", [{ id: "1", text: "Test" }]);
+  assert.deepEqual(loadJSON("dashboard.tasks", []), [{ id: "1", text: "Test" }]);
+
+  const backup = exportDashboardData();
+  localStorage.clear();
+  importDashboardData(backup);
+  assert.deepEqual(loadJSON("dashboard.tasks", []), [{ id: "1", text: "Test" }]);
+});
+
+test("invalid backups are rejected before changing storage", function () {
+  localStorage.clear();
+  localStorage.setItem("dashboard.keep", JSON.stringify("original"));
+  assert.throws(function () {
+    importDashboardData({
+      version: 1,
+      data: {
+        "dashboard.new": JSON.stringify("new value"),
+        "dashboard.broken": "not-json",
+      },
+    });
+  });
+  assert.equal(localStorage.getItem("dashboard.new"), null);
+  assert.equal(loadJSON("dashboard.keep", null), "original");
+});
+
+test("typed storage helpers contain malformed values", function () {
+  localStorage.setItem("dashboard.array", JSON.stringify({ wrong: true }));
+  localStorage.setItem("dashboard.object", JSON.stringify(["wrong"]));
+  assert.deepEqual(loadArray("dashboard.array"), []);
+  assert.deepEqual(loadObject("dashboard.object"), {});
+});
+
+test("generated IDs are unique", function () {
+  const ids = new Set(Array.from({ length: 500 }, createId));
+  assert.equal(ids.size, 500);
+});
+
+test("focus timer derives reload-safe remaining time from its end timestamp", function () {
+  const now = 1_000_000;
+  assert.equal(remainingSecondsUntil(now + 90_000, now), 90);
+  assert.equal(remainingSecondsUntil(now + 1, now), 1);
+  assert.equal(remainingSecondsUntil(now - 1, now), 0);
+});
+
+test("configured timezones and feed URLs are valid", function () {
+  LOCATIONS.forEach(function (location) { assert.equal(isValidTimeZone(location.zone), true); });
+  NEWS_FEEDS.forEach(function (feed) { assert.equal(new URL(feed.url).protocol, "https:"); });
+});
+
+test("relative time handles past, present, and future", function () {
+  assert.equal(formatRelative(Date.now()), "now");
+  assert.match(formatRelative(Date.now() + 2 * 60 * 60 * 1000), /2 hours|in 2 hours/);
+  assert.match(formatRelative(Date.now() - 24 * 60 * 60 * 1000), /yesterday|1 day ago/);
+});
+
+test("every JavaScript element ID exists once in the page", async function () {
+  const root = new URL("../", import.meta.url);
+  const html = await readFile(new URL("index.html", root), "utf8");
+  const ids = Array.from(html.matchAll(/\bid="([^"]+)"/g), function (match) { return match[1]; });
+  assert.equal(new Set(ids).size, ids.length, "HTML contains duplicate IDs");
+
+  const jsRoot = new URL("js/", root);
+  const widgetNames = await readdir(new URL("widgets/", jsRoot));
+  const files = ["main.js", "storage.js", "state.js", "utils.js", "config.js"]
+    .map(function (name) { return new URL(name, jsRoot); })
+    .concat(widgetNames.filter(function (name) { return name.endsWith(".js"); }).map(function (name) {
+      return new URL("widgets/" + name, jsRoot);
+    }));
+
+  for (const file of files) {
+    const source = await readFile(file, "utf8");
+    for (const match of source.matchAll(/getElementById\("([^"]+)"\)/g)) {
+      assert.ok(ids.includes(match[1]), `${match[1]} referenced by ${join(file.pathname)} is missing from index.html`);
+    }
+  }
+});
+
+test("every widget module loads without top-level errors", async function () {
+  const widgetFiles = (await readdir(new URL("../js/widgets/", import.meta.url)))
+    .filter(function (name) { return name.endsWith(".js"); });
+  const modules = await Promise.all(widgetFiles.map(function (name) {
+    return import(new URL("../js/widgets/" + name, import.meta.url));
+  }));
+  modules.forEach(function (module, index) {
+    assert.ok(Object.keys(module).length > 0, widgetFiles[index] + " has no exports");
+  });
+});

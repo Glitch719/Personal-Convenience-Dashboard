@@ -34,6 +34,7 @@ export function initSummary() {
       const t = state.taskSummary;
       let txt = t.remaining + " of " + t.total + " left";
       if (t.top) txt += "  \u00B7  next: " + t.top;
+      if (t.due) txt += " (due " + t.due + ")";
       lines.push(line("Tasks", txt));
     } else {
       lines.push(line("Tasks", "All clear"));
@@ -42,7 +43,9 @@ export function initSummary() {
     // Spending this month (published by the expenses widget)
     if (state.expenseTotal) {
       const e = state.expenseTotal;
-      lines.push(line("Spending", e.currency + e.amount.toFixed(2) + " this month"));
+      let spending = e.currency + e.amount.toFixed(2) + " this month";
+      if (e.budget > 0) spending += " of " + e.currency + e.budget.toFixed(2) + " budget";
+      lines.push(line("Spending", spending));
     }
 
     // Next reminder (published by the reminders widget)

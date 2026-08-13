@@ -1,6 +1,9 @@
 import { LOCATIONS } from "../config.js";
 import { isValidTimeZone, partsFor } from "../utils.js";
 import { state } from "../state.js";
+import { loadJSON } from "../storage.js";
+
+const NAME_KEY = "dashboard.displayName";
 
 function updateGreeting() {
   // Prefer the local card, but fall back to any valid zone so a broken
@@ -36,11 +39,13 @@ function updateGreeting() {
     sub += ". " + state.currentWeather.temp + "\u00B0 and " + state.currentWeather.cond.toLowerCase();
   }
 
-  textEl.textContent = word + ".";
+  const name = String(loadJSON(NAME_KEY, "") || "").trim();
+  textEl.textContent = word + (name ? ", " + name : "") + ".";
   subEl.textContent = sub + ".";
 }
 
 export function initGreeting() {
   updateGreeting();
+  window.addEventListener("dashboard:name-changed", updateGreeting);
   setInterval(updateGreeting, 1000);
 }

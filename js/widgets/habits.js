@@ -1,4 +1,4 @@
-import { loadJSON, saveJSON } from "../storage.js";
+import { loadArray, saveJSON } from "../storage.js";
 import { createId, reportStatus } from "../utils.js";
 
 const HABITS_KEY = "dashboard.habits";
@@ -11,10 +11,11 @@ function dayKey(d) {
 }
 
 export function initHabits() {
-  let habits = loadJSON(HABITS_KEY, []);
+  let habits = loadArray(HABITS_KEY);
 
   const input  = document.getElementById("habit-input");
   const listEl = document.getElementById("habits-list");
+  const progressEl = document.getElementById("habits-progress");
 
   function save() { saveJSON(HABITS_KEY, habits); }
 
@@ -61,6 +62,9 @@ export function initHabits() {
 
   function render() {
     listEl.innerHTML = "";
+    const today = dayKey(new Date());
+    const doneToday = habits.filter(function (habit) { return habit.dates.includes(today); }).length;
+    progressEl.textContent = habits.length ? doneToday + " of " + habits.length + " done today" : "";
     if (habits.length === 0) {
       listEl.innerHTML = '<p class="habits-empty">No habits yet. Add one above.</p>';
       return;
@@ -118,6 +122,9 @@ export function initHabits() {
   function submit() {
     const name = input.value.trim();
     if (!name) return reportStatus("Enter a habit first.", input);
+    if (habits.some(function (habit) { return habit.name.toLowerCase() === name.toLowerCase(); })) {
+      return reportStatus("That habit already exists.", input);
+    }
     addHabit(name);
     input.value = "";
     input.focus();

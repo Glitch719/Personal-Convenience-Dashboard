@@ -1,11 +1,18 @@
-import { loadJSON, saveJSON } from "../storage.js";
+import { exportDashboardData, importDashboardData, loadJSON, loadObject, saveJSON } from "../storage.js";
+import { reportStatus } from "../utils.js";
 
 const VISIBILITY_KEY = "dashboard.widgetVisibility";
+const NAME_KEY = "dashboard.displayName";
 
 export function initSettings() {
   const btn   = document.getElementById("settings-btn");
   const panel = document.getElementById("settings-panel");
   const list  = document.getElementById("settings-list");
+  const exportBtn = document.getElementById("settings-export");
+  const importInput = document.getElementById("settings-import");
+  const importBtn = document.getElementById("settings-import-btn");
+  const nameInput = document.getElementById("settings-name");
+  const nameSaveBtn = document.getElementById("settings-name-save");
 
   // Auto-discovery: find every section tagged as a widget. Adding a new
   // widget later needs nothing here, just the data-widget attribute on it.
@@ -18,7 +25,7 @@ export function initSettings() {
   });
 
   // Saved visibility map, e.g. { weather: true, tasks: false }.
-  let visibility = loadJSON(VISIBILITY_KEY, {});
+  let visibility = loadObject(VISIBILITY_KEY);
 
   // Anything not explicitly turned off counts as visible, so new widgets
   // show up by default.
@@ -82,6 +89,41 @@ export function initSettings() {
       btn.focus();
     }
   });
+
+  exportBtn.addEventListener("click", function () {
+    const blob = new Blob([JSON.stringify(exportDashboardData(), null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "daily-dashboard-backup.json";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 0);
+  });
+
+  importBtn.addEventListener("click", function () { importInput.click(); });
+
+  importInput.addEventListener("change", async function () {
+    const file = importInput.files && importInput.files[0];
+    if (!file) return;
+    try {
+      importDashboardData(JSON.parse(await file.text()));
+      location.reload();
+    } catch (err) {
+      reportStatus(err.message || "Could not import that backup.", importInput);
+      importInput.value = "";
+    }
+  });
+
+  nameInput.value = String(loadJSON(NAME_KEY, "") || "");
+  function saveName() {
+    saveJSON(NAME_KEY, nameInput.value.trim());
+    window.dispatchEvent(new CustomEvent("dashboard:name-changed"));
+    reportStatus("Greeting name saved.");
+  }
+  nameSaveBtn.addEventListener("click", saveName);
+  nameInput.addEventListener("keydown", function (e) { if (e.key === "Enter") saveName(); });
 
   buildList();
   apply();

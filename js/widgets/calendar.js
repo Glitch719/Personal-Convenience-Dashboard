@@ -1,4 +1,4 @@
-import { loadJSON, saveJSON } from "../storage.js";
+import { loadArray, saveJSON } from "../storage.js";
 import { state } from "../state.js";
 import { createId, reportStatus } from "../utils.js";
 
@@ -16,7 +16,7 @@ const titleFmt = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeri
 const panelFmt = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
 export function initCalendar() {
-  let events = loadJSON(EVENTS_KEY, []);
+  let events = loadArray(EVENTS_KEY);
 
   const now = new Date();
   let viewYear = now.getFullYear();     // which month the grid is showing
@@ -30,7 +30,7 @@ export function initCalendar() {
 
   // Combine an event's date and optional time into a single timestamp.
   function eventWhenMs(ev) {
-    return new Date(ev.date + "T" + (ev.time || "00:00")).getTime();
+    return new Date(ev.date + "T" + (ev.time || "23:59:59")).getTime();
   }
 
   // Publish the soonest still-upcoming event for the Today summary. This is
@@ -122,28 +122,31 @@ export function initCalendar() {
 
     for (let d = 1; d <= daysInMonth; d++) {
       const key = dateKey(viewYear, viewMonth, d);
-      const cell = document.createElement("div");
+      const cell = document.createElement("button");
+      cell.type = "button";
       cell.className = "cal-cell";
       if (key === todayKey)     cell.classList.add("today");
       if (key === selectedDate) cell.classList.add("selected");
 
-      const num = document.createElement("div");
+      const num = document.createElement("span");
       num.className = "cal-daynum";
       num.textContent = d;
       cell.appendChild(num);
 
       const dayEvents = eventsOn(key);
+      cell.setAttribute("aria-label", key + (dayEvents.length ? ", " + dayEvents.length + " event" + (dayEvents.length === 1 ? "" : "s") : ", no events"));
+      cell.setAttribute("aria-pressed", String(key === selectedDate));
       if (dayEvents.length > 0) {
-        const chips = document.createElement("div");
+        const chips = document.createElement("span");
         chips.className = "cal-chips";
         dayEvents.slice(0, 3).forEach(function (ev) {
-          const chip = document.createElement("div");
+          const chip = document.createElement("span");
           chip.className = "cal-chip";
           chip.textContent = (ev.time ? ev.time + " " : "") + ev.title;
           chips.appendChild(chip);
         });
         if (dayEvents.length > 3) {
-          const more = document.createElement("div");
+          const more = document.createElement("span");
           more.className = "cal-more";
           more.textContent = "+" + (dayEvents.length - 3) + " more";
           chips.appendChild(more);
@@ -185,9 +188,12 @@ export function initCalendar() {
     const titleInput = document.createElement("input");
     titleInput.type = "text";
     titleInput.placeholder = "New event";
+    titleInput.setAttribute("aria-label", "Event title");
+    titleInput.maxLength = 160;
 
     const timeInput = document.createElement("input");
     timeInput.type = "time";
+    timeInput.setAttribute("aria-label", "Event time, optional");
 
     const addBtn = document.createElement("button");
     addBtn.textContent = "Add";
@@ -235,19 +241,23 @@ export function initCalendar() {
       del.className = "cal-event-del";
       del.textContent = "\u00D7";
       del.title = "Delete event";
+      del.setAttribute("aria-label", "Delete event: " + ev.title);
       del.addEventListener("click", function () { deleteEvent(ev.id); });
 
       head.append(left, del);
       box.appendChild(head);
 
       // The signature feature: prep notes attached to this event.
-      const label = document.createElement("div");
+      const label = document.createElement("label");
       label.className = "cal-notes-label";
       label.textContent = "Prep notes";
 
       const notes = document.createElement("textarea");
       notes.className = "cal-notes";
       notes.placeholder = "What to prepare or say...";
+      notes.id = "event-notes-" + ev.id;
+      notes.maxLength = 2000;
+      label.htmlFor = notes.id;
       notes.value = ev.notes || "";
       // autosave on every keystroke, without re-rendering (keeps focus)
       notes.addEventListener("input", function () { updateNotes(ev.id, notes.value); });

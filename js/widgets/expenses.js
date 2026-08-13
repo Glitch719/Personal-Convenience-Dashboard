@@ -1,13 +1,15 @@
-import { loadJSON, saveJSON } from "../storage.js";
+import { loadArray, loadJSON, saveJSON } from "../storage.js";
 import { CURRENCY, EXPENSE_CATEGORIES } from "../config.js";
 import { state } from "../state.js";
 import { createId, reportStatus } from "../utils.js";
 
 const EXPENSES_KEY = "dashboard.expenses";
+const BUDGET_KEY = "dashboard.expenseBudget";
 const monthFmt = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" });
 
 export function initExpenses() {
-  let entries = loadJSON(EXPENSES_KEY, []);
+  let entries = loadArray(EXPENSES_KEY);
+  let budget = Number(loadJSON(BUDGET_KEY, 0)) || 0;
 
   const now = new Date();
   let viewYear = now.getFullYear();
@@ -20,6 +22,10 @@ export function initExpenses() {
   const totalEl     = document.getElementById("exp-total");
   const titleEl     = document.getElementById("exp-title");
   const chartEl     = document.getElementById("exp-chart");
+  const noteInput   = document.getElementById("exp-note");
+  const budgetInput = document.getElementById("exp-budget");
+  const budgetStatus = document.getElementById("exp-budget-status");
+  const exportBtn = document.getElementById("exp-export");
 
   function save() { saveJSON(EXPENSES_KEY, entries); }
 
@@ -31,7 +37,7 @@ export function initExpenses() {
     const total = entries
       .filter(function (e) { return e.date.startsWith(prefix); })
       .reduce(function (sum, e) { return sum + e.amount; }, 0);
-    state.expenseTotal = { amount: total, currency: CURRENCY };
+    state.expenseTotal = { amount: total, currency: CURRENCY, budget: budget };
   }
 
   function money(n) { return CURRENCY + n.toFixed(2); }
@@ -56,8 +62,8 @@ export function initExpenses() {
       .sort(function (a, b) { return b.date.localeCompare(a.date); });
   }
 
-  function addEntry(amount, category, date) {
-    entries.push({ id: createId(), amount: amount, category: category, date: date });
+  function addEntry(amount, category, date, note) {
+    entries.push({ id: createId(), amount: amount, category: category, date: date, note: note || "" });
     save(); publishSummary(); render();
   }
 
@@ -74,6 +80,16 @@ export function initExpenses() {
     // reduce: fold the list of entries down to a single running total.
     const total = monthEntries.reduce(function (sum, e) { return sum + e.amount; }, 0);
     totalEl.textContent = money(total);
+
+    if (budget > 0) {
+      const left = budget - total;
+      budgetStatus.textContent = left >= 0 ? money(left) + " remaining" : money(Math.abs(left)) + " over budget";
+      budgetStatus.classList.toggle("over", left < 0);
+    } else {
+      budgetStatus.textContent = "No budget set";
+      budgetStatus.classList.remove("over");
+    }
+    exportBtn.disabled = monthEntries.length === 0;
 
     renderChart(monthEntries);
     renderList(monthEntries);
@@ -138,6 +154,12 @@ export function initExpenses() {
       const cat = document.createElement("span");
       cat.className = "exp-item-cat";
       cat.textContent = e.category;
+      if (e.note) {
+        const note = document.createElement("span");
+        note.className = "exp-item-note";
+        note.textContent = e.note;
+        cat.appendChild(note);
+      }
       const date = document.createElement("span");
       date.className = "exp-item-date";
       date.textContent = e.date;
@@ -164,8 +186,9 @@ export function initExpenses() {
     const category = catSelect.value;
     const date = dateInput.value || todayStr();
     if (!(amount > 0)) return reportStatus("Enter an expense amount greater than zero.", amountInput);
-    addEntry(amount, category, date);
+    addEntry(amount, category, date, noteInput.value.trim());
     amountInput.value = "";
+    noteInput.value = "";
     amountInput.focus();
   }
 
@@ -174,6 +197,36 @@ export function initExpenses() {
     viewYear = d.getFullYear();
     viewMonth = d.getMonth();
     render();
+  }
+
+  function saveBudget() {
+    const value = parseFloat(budgetInput.value);
+    if (budgetInput.value && !(value > 0)) {
+      return reportStatus("Enter a budget greater than zero, or leave it blank to clear.", budgetInput);
+    }
+    budget = value > 0 ? value : 0;
+    saveJSON(BUDGET_KEY, budget);
+    publishSummary();
+    render();
+  }
+
+  function csvCell(value) {
+    return '"' + String(value == null ? "" : value).replace(/"/g, '""') + '"';
+  }
+
+  function exportMonth() {
+    const rows = [["Date", "Category", "Description", "Amount"]].concat(entriesThisMonth().map(function (entry) {
+      return [entry.date, entry.category, entry.note || "", entry.amount.toFixed(2)];
+    }));
+    const csv = rows.map(function (row) { return row.map(csvCell).join(","); }).join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "expenses-" + monthPrefix() + ".csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 0);
   }
 
   // Fill the category dropdown from config.
@@ -185,11 +238,20 @@ export function initExpenses() {
   });
 
   dateInput.value = todayStr();
+  budgetInput.value = budget || "";
 
   document.getElementById("exp-add").addEventListener("click", submit);
   amountInput.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
   document.getElementById("exp-prev").addEventListener("click", function () { shiftMonth(-1); });
   document.getElementById("exp-next").addEventListener("click", function () { shiftMonth(1); });
+  document.getElementById("exp-today").addEventListener("click", function () {
+    const today = new Date();
+    viewYear = today.getFullYear();
+    viewMonth = today.getMonth();
+    render();
+  });
+  document.getElementById("exp-budget-save").addEventListener("click", saveBudget);
+  exportBtn.addEventListener("click", exportMonth);
 
   publishSummary();
   render();

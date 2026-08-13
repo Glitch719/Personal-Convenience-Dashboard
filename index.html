@@ -26,11 +26,24 @@
   <div id="app-status" class="sr-only" role="status" aria-live="polite"></div>
   <button type="button" class="settings-btn" id="settings-btn" aria-controls="settings-panel" aria-expanded="false">Settings</button>
   <div class="settings-panel" id="settings-panel" role="dialog" aria-label="Dashboard settings" hidden>
+    <h2>Personalize</h2>
+    <div class="settings-name-row">
+      <input type="text" id="settings-name" placeholder="Your name" aria-label="Your name" maxlength="40" />
+      <button type="button" id="settings-name-save">Save</button>
+    </div>
+    <div class="settings-divider"></div>
     <h2>Theme</h2>
     <div class="theme-options" id="theme-options"></div>
     <div class="settings-divider"></div>
     <h2>Widgets</h2>
     <div class="settings-list" id="settings-list"></div>
+    <div class="settings-divider"></div>
+    <h2>Your data</h2>
+    <div class="settings-data-actions">
+      <button type="button" id="settings-export">Export backup</button>
+      <button type="button" id="settings-import-btn">Import backup</button>
+      <input type="file" id="settings-import" accept="application/json,.json" hidden />
+    </div>
   </div>
 
   <div class="dashboard">
@@ -52,17 +65,26 @@
     <!-- Weather widget. JavaScript fills in the numbers. -->
     <section class="weather-card" id="weather" data-widget="weather" data-widget-label="Weather">
       <div class="weather-left">
-        <div class="weather-city" id="weather-city"></div>
+        <div class="widget-title-row">
+          <div class="weather-city" id="weather-city"></div>
+          <button type="button" class="widget-refresh" id="weather-refresh">Refresh</button>
+        </div>
         <div class="weather-main">
           <span class="weather-temp" id="weather-temp">--&deg;</span>
           <span class="weather-cond" id="weather-cond">Loading weather...</span>
         </div>
+        <div class="widget-status" id="weather-updated" aria-live="polite"></div>
       </div>
       <div class="weather-stats" id="weather-stats"></div>
     </section>
 
     <!-- Clock widget. Also filled in by JavaScript. -->
-    <section class="clock-grid" id="clock-grid" data-widget="clock" data-widget-label="Clocks"></section>
+    <section class="clock-grid" id="clock-grid" data-widget="clock" data-widget-label="Clocks">
+      <div class="clock-toolbar">
+        <h2>World clocks</h2>
+        <button type="button" id="clock-format" aria-pressed="true">24-hour</button>
+      </div>
+    </section>
 
     <!-- Tasks widget. -->
     <section class="tasks-card" id="tasks" data-widget="tasks" data-widget-label="Tasks">
@@ -72,7 +94,21 @@
       </div>
       <div class="task-input-row">
         <input type="text" id="task-input" placeholder="Add a task and press Enter" aria-label="New task" maxlength="160" />
+        <select id="task-priority" aria-label="Task priority">
+          <option value="normal">Normal</option>
+          <option value="high">High priority</option>
+          <option value="low">Low priority</option>
+        </select>
+        <input type="date" id="task-due" aria-label="Task due date" />
         <button type="button" id="task-add">Add</button>
+      </div>
+      <div class="task-toolbar">
+        <div class="task-filters" role="group" aria-label="Filter tasks">
+          <button type="button" data-task-filter="open" aria-pressed="true">Open</button>
+          <button type="button" data-task-filter="all" aria-pressed="false">All</button>
+          <button type="button" data-task-filter="done" aria-pressed="false">Done</button>
+        </div>
+        <button type="button" id="tasks-clear" class="tasks-clear">Clear completed</button>
       </div>
       <ul class="task-list" id="task-list"></ul>
     </section>
@@ -85,13 +121,19 @@
         <input type="datetime-local" id="reminder-time" aria-label="Reminder date and time" />
         <button type="button" id="reminder-add">Add</button>
       </div>
+      <div class="reminder-quick" role="group" aria-label="Set reminder time quickly">
+        <span>Quick time:</span>
+        <button type="button" data-reminder-min="10">10 min</button>
+        <button type="button" data-reminder-min="60">1 hour</button>
+        <button type="button" data-reminder-min="1440">Tomorrow</button>
+      </div>
       <ul class="reminder-list" id="reminder-list"></ul>
     </section>
 
     <!-- Grocery list widget. -->
     <section class="grocery-card" id="grocery" data-widget="grocery" data-widget-label="Grocery">
       <div class="grocery-header">
-        <h2>Grocery</h2>
+        <div><h2>Grocery</h2><span class="widget-status" id="grocery-count"></span></div>
         <button type="button" id="grocery-clear" class="grocery-clear">Clear checked</button>
       </div>
       <div class="grocery-input-row">
@@ -125,6 +167,7 @@
             <button type="button" id="exp-prev" aria-label="Previous month">Prev</button>
             <span id="exp-title">Month</span>
             <button type="button" id="exp-next" aria-label="Next month">Next</button>
+            <button type="button" id="exp-today">This month</button>
           </div>
         </div>
         <div class="exp-total-group">
@@ -136,8 +179,17 @@
       <div class="exp-input-row">
         <input type="number" id="exp-amount" placeholder="Amount" step="0.01" min="0.01" aria-label="Expense amount" />
         <select id="exp-category" aria-label="Expense category"></select>
+        <input type="text" id="exp-note" placeholder="Description (optional)" aria-label="Expense description" maxlength="100" />
         <input type="date" id="exp-date" aria-label="Expense date" />
         <button type="button" id="exp-add">Add</button>
+      </div>
+
+      <div class="exp-budget-row">
+        <label for="exp-budget">Monthly budget</label>
+        <input type="number" id="exp-budget" min="0" step="0.01" placeholder="No budget" />
+        <button type="button" id="exp-budget-save">Save</button>
+        <span id="exp-budget-status" aria-live="polite"></span>
+        <button type="button" id="exp-export">Export CSV</button>
       </div>
 
       <div class="exp-chart" id="exp-chart"></div>
@@ -146,7 +198,7 @@
 
     <!-- Habit tracker widget. -->
     <section class="habits-card" id="habits" data-widget="habits" data-widget-label="Habits">
-      <div class="habits-header"><h2>Habits</h2></div>
+      <div class="habits-header"><h2>Habits</h2><span class="widget-status" id="habits-progress"></span></div>
       <div class="habits-input-row">
         <input type="text" id="habit-input" placeholder="New habit and press Enter" aria-label="New habit" maxlength="100" />
         <button type="button" id="habit-add">Add</button>
@@ -162,6 +214,7 @@
         <input type="text" id="link-label" placeholder="Label" aria-label="Link label" maxlength="60" />
         <input type="url" id="link-url" placeholder="example.com" aria-label="Link URL" />
         <button type="button" id="link-add">Add</button>
+        <button type="button" id="link-cancel" hidden>Cancel</button>
       </div>
     </section>
 
@@ -181,7 +234,13 @@
 
     <!-- News widget. -->
     <section class="news-card" id="news" data-widget="news" data-widget-label="News">
-      <div class="news-header"><h2>News</h2></div>
+      <div class="news-header widget-title-row">
+        <div>
+          <h2>News</h2>
+          <div class="widget-status" id="news-updated" aria-live="polite"></div>
+        </div>
+        <button type="button" class="widget-refresh" id="news-refresh">Refresh</button>
+      </div>
       <ul class="news-list" id="news-list"></ul>
     </section>
 
