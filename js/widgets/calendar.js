@@ -1,6 +1,7 @@
 import { loadArray, loadObject, saveJSON } from "../storage.js";
 import { state } from "../state.js";
 import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
+import { getPlannerItems } from "../planner.js";
 
 const EVENTS_KEY = "dashboard.events";
 const FILTERS_KEY = "dashboard.calendarFilters";
@@ -90,6 +91,15 @@ export function initCalendar() {
   const agendaCount = document.getElementById("cal-agenda-count");
 
   function save() { saveJSON(EVENTS_KEY, events); }
+  function allItems() {
+    const today = new Date();
+    const monthStart = new Date(viewYear, viewMonth, 1);
+    const monthEnd = new Date(viewYear, viewMonth + 1, 0);
+    const agendaEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 90);
+    const start = monthStart < today ? monthStart : today;
+    const end = monthEnd > agendaEnd ? monthEnd : agendaEnd;
+    return events.concat(getPlannerItems(start, end));
+  }
   function filterKey(event) { return event.type === "custom" ? "custom:" + event.label.toLowerCase() : event.type; }
   function itemLabel(event) { return event.type === "custom" ? event.label : CALENDAR_TYPES[event.type].label; }
   function isEnabled(group, key) { return group[key] !== false; }
@@ -99,7 +109,7 @@ export function initCalendar() {
 
   function publishNextEvent() {
     const current = Date.now();
-    const upcoming = sortUpcomingItems(events.filter(function (event) { return eventWhenMs(event) >= current; }));
+    const upcoming = sortUpcomingItems(allItems().filter(function (event) { return !event.completed && eventWhenMs(event) >= current; }));
     state.nextEvent = upcoming.length ? {
       title: upcoming[0].title,
       time: upcoming[0].time,
@@ -109,7 +119,7 @@ export function initCalendar() {
   }
 
   function eventsOn(key) {
-    return sortCalendarItems(events.filter(function (event) { return event.date === key && isVisible(event); }));
+    return sortCalendarItems(allItems().filter(function (event) { return event.date === key && isVisible(event); }));
   }
 
   function addEvent(values) {
@@ -240,6 +250,8 @@ export function initCalendar() {
   function makeEventDetails(event, compact) {
     const details = document.createElement("details");
     details.className = compact ? "cal-agenda-item" : "cal-event";
+    if (event.external) details.classList.add("cal-external-item");
+    if (event.completed) details.classList.add("completed");
     details.style.setProperty("--item-color", event.color);
     const summary = document.createElement("summary");
     const summaryMain = document.createElement("span");
@@ -251,6 +263,12 @@ export function initCalendar() {
     title.className = "cal-event-title";
     title.textContent = event.title;
     summaryMain.append(priority, title, createBadge(event));
+    if (event.completed) {
+      const done = document.createElement("span");
+      done.className = "cal-completed-badge";
+      done.textContent = "Done";
+      summaryMain.appendChild(done);
+    }
     const when = document.createElement("span");
     when.className = "cal-event-time";
     when.textContent = compact
@@ -275,7 +293,13 @@ export function initCalendar() {
       link.textContent = "Open related link";
       content.appendChild(link);
     }
-    if (!compact) {
+    if (!compact && !event.external) {
+      if (event.notes) {
+        const notesCopy = document.createElement("p");
+        notesCopy.className = "cal-notes-copy";
+        notesCopy.textContent = event.notes;
+        content.appendChild(notesCopy);
+      }
       const label = document.createElement("label");
       label.className = "cal-notes-label";
       label.textContent = "Notes";
@@ -386,8 +410,8 @@ export function initCalendar() {
 
   function renderAgenda() {
     const current = Date.now();
-    const upcoming = sortUpcomingItems(events.filter(function (event) {
-      return eventWhenMs(event) >= current && isVisible(event);
+    const upcoming = sortUpcomingItems(allItems().filter(function (event) {
+      return !event.completed && eventWhenMs(event) >= current && isVisible(event);
     }));
     agendaCount.textContent = upcoming.length ? "(" + upcoming.length + ")" : "";
     agendaList.innerHTML = "";
@@ -409,6 +433,9 @@ export function initCalendar() {
   document.getElementById("cal-today").addEventListener("click", function () {
     const today = new Date(); viewYear = today.getFullYear(); viewMonth = today.getMonth();
     selectedDate = dateKey(viewYear, viewMonth, today.getDate()); renderCalendar(); renderPanel();
+  });
+  window.addEventListener("dashboard:planner-changed", function () {
+    publishNextEvent(); renderAll();
   });
 
   save();

@@ -19,8 +19,8 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Our styles now live in their own file. -->
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="redesign.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=planner1" />
+  <link rel="stylesheet" href="redesign.css?v=planner1" />
 </head>
 
 <body>
@@ -71,6 +71,7 @@
       </a>
       <div class="app-bar-actions">
         <span class="header-date" id="header-date"></span>
+        <button type="button" class="edit-mode-btn" id="edit-mode-btn" aria-pressed="true">Done</button>
         <button type="button" class="settings-btn" id="settings-btn" aria-controls="settings-panel" aria-expanded="false">
           <span aria-hidden="true">☰</span> Customize
         </button>
@@ -248,6 +249,23 @@
         <input type="text" id="habit-input" placeholder="New habit and press Enter" aria-label="New habit" maxlength="100" />
         <button type="button" id="habit-add">Add</button>
       </div>
+      <details class="habit-schedule-form">
+        <summary>Schedule this habit</summary>
+        <div class="habit-schedule-fields">
+          <div class="habit-weekdays" role="group" aria-label="Habit schedule weekdays">
+            <button type="button" data-habit-weekday="1" aria-pressed="false">M</button>
+            <button type="button" data-habit-weekday="2" aria-pressed="false">T</button>
+            <button type="button" data-habit-weekday="3" aria-pressed="false">W</button>
+            <button type="button" data-habit-weekday="4" aria-pressed="false">T</button>
+            <button type="button" data-habit-weekday="5" aria-pressed="false">F</button>
+            <button type="button" data-habit-weekday="6" aria-pressed="false">S</button>
+            <button type="button" data-habit-weekday="0" aria-pressed="false">S</button>
+          </div>
+          <input type="time" id="habit-time" aria-label="Habit reminder time" />
+          <label class="habit-notify-option"><input type="checkbox" id="habit-notify" /> Notify me</label>
+        </div>
+        <p class="habit-schedule-hint">Select weekdays to place the habit on your calendar. A time is optional.</p>
+      </details>
       <div class="habits-list" id="habits-list"></div>
     </section>
 
@@ -305,6 +323,6 @@
 
   <!-- One entry point, loaded as a module so it can import the others. -->
   <!-- type="module" requires a server (Live Server), not a double-clicked file. -->
-  <script type="module" src="js/main.js?v=customization2"></script>
+  <script type="module" src="js/main.js?v=planner1"></script>
 </body>
 </html>

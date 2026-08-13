@@ -21,6 +21,8 @@ const { LOCATIONS, NEWS_FEEDS } = await import("../js/config.js");
 const { remainingSecondsUntil } = await import("../js/widgets/focus.js");
 const { moveInOrder, normalizeOrder } = await import("../js/widgets/layout.js");
 const { normalizeCalendarEvent, sortCalendarItems, sortUpcomingItems } = await import("../js/widgets/calendar.js");
+const { normalizeHabit } = await import("../js/widgets/habits.js");
+const { projectHabitItems, projectReminderItems, projectTaskItems } = await import("../js/planner.js");
 
 test("storage round-trips dashboard data", function () {
   localStorage.clear();
@@ -98,6 +100,34 @@ test("calendar items migrate safely and respect day and agenda ordering", functi
   const tomorrow = normalizeCalendarEvent({ id: "tomorrow", date: "2026-08-15", time: "07:00", title: "Tomorrow", priority: "high" });
   assert.deepEqual(sortCalendarItems([lowEarly, highLate]).map(function (item) { return item.id; }), ["high", "low"]);
   assert.deepEqual(sortUpcomingItems([tomorrow, lowEarly, highLate]).map(function (item) { return item.id; }), ["high", "low", "tomorrow"]);
+});
+
+test("tasks, reminders, and scheduled habits project into the calendar without duplicate storage", function () {
+  const taskItems = projectTaskItems([
+    { id: "t1", text: "Submit work", due: "2026-08-17", priority: "high", done: false },
+    { id: "t2", text: "No date", due: "", priority: "normal", done: false },
+  ]);
+  assert.equal(taskItems.length, 1);
+  assert.deepEqual(
+    { id: taskItems[0].id, type: taskItems[0].type, priority: taskItems[0].priority, external: taskItems[0].external },
+    { id: "task:t1", type: "task", priority: "high", external: true },
+  );
+
+  const reminderTime = new Date(2026, 7, 18, 9, 30).getTime();
+  const reminderItems = projectReminderItems([{ id: "r1", text: "Call", time: reminderTime }]);
+  assert.equal(reminderItems[0].date, "2026-08-18");
+  assert.equal(reminderItems[0].time, "09:30");
+
+  const legacyHabit = normalizeHabit({ id: "h0", name: "Legacy", dates: [] });
+  assert.deepEqual(legacyHabit.schedule, { days: [], time: "", notify: false });
+  const scheduledHabit = normalizeHabit({
+    id: "h1", name: "Exercise", dates: ["2026-08-17"],
+    schedule: { days: [1], time: "07:00", notify: true },
+  });
+  const habitItems = projectHabitItems(scheduledHabit ? [scheduledHabit] : [], new Date(2026, 7, 17), new Date(2026, 7, 18));
+  assert.equal(habitItems.length, 1);
+  assert.equal(habitItems[0].date, "2026-08-17");
+  assert.equal(habitItems[0].completed, true);
 });
 
 test("configured timezones and feed URLs are valid", function () {

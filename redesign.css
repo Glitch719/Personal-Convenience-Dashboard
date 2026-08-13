@@ -114,6 +114,36 @@ body::before {
   backdrop-filter: blur(18px);
 }
 .settings-btn span { color: var(--accent); }
+.edit-mode-btn {
+  border: 1px solid var(--border); border-radius: 9px; padding: 8px 13px;
+  background: var(--surface-2); color: var(--muted); font: 600 12px inherit; cursor: pointer;
+}
+.edit-mode-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.edit-mode-btn:hover { color: var(--text); border-color: var(--accent); }
+
+body.edit-mode .cal-notes-copy { display: none; }
+body:not(.edit-mode) .settings-btn,
+body:not(.edit-mode) .task-input-row,
+body:not(.edit-mode) .tasks-clear,
+body:not(.edit-mode) .task-del,
+body:not(.edit-mode) .reminder-input-row,
+body:not(.edit-mode) .reminder-quick,
+body:not(.edit-mode) .reminder-del,
+body:not(.edit-mode) .grocery-input-row,
+body:not(.edit-mode) .grocery-clear,
+body:not(.edit-mode) .grocery-del,
+body:not(.edit-mode) .exp-input-row,
+body:not(.edit-mode) .exp-budget-row,
+body:not(.edit-mode) .exp-del,
+body:not(.edit-mode) .habits-input-row,
+body:not(.edit-mode) .habit-schedule-form,
+body:not(.edit-mode) .habit-del,
+body:not(.edit-mode) .links-input-row,
+body:not(.edit-mode) .link-edit,
+body:not(.edit-mode) .link-del,
+body:not(.edit-mode) .cal-add-form,
+body:not(.edit-mode) .cal-event-del,
+body:not(.edit-mode) .cal-notes-label { display: none !important; }
 .settings-panel { top: 76px; right: max(20px, calc((100vw - 1440px) / 2 + 32px)); border-color: var(--border-strong); backdrop-filter: blur(24px); }
 .density-options, .layout-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .density-options { margin-bottom: 7px; }

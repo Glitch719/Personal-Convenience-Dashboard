@@ -1,6 +1,7 @@
 import { loadArray, saveJSON } from "../storage.js";
 import { state } from "../state.js";
 import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
+import { notifyPlannerChanged } from "../planner.js";
 
 const TASKS_KEY = "dashboard.tasks";
 
@@ -27,6 +28,7 @@ export function initTasks() {
   function addTask(text, priority, due) {
     tasks.push({ id: createId(), text: text, done: false, priority: priority, due: due || "", createdAt: Date.now() });
     saveJSON(TASKS_KEY, tasks);
+    notifyPlannerChanged();
     render();
   }
 
@@ -34,6 +36,7 @@ export function initTasks() {
     const t = tasks.find(function (t) { return t.id === id; });
     if (t) t.done = !t.done;
     saveJSON(TASKS_KEY, tasks);
+    notifyPlannerChanged();
     render();
   }
 
@@ -43,10 +46,12 @@ export function initTasks() {
     const removed = [{ index: index, item: tasks[index] }];
     tasks.splice(index, 1);
     saveJSON(TASKS_KEY, tasks);
+    notifyPlannerChanged();
     render();
     offerUndo("Task deleted.", function () {
       tasks = restoreRemovedItems(tasks, removed);
       saveJSON(TASKS_KEY, tasks);
+      notifyPlannerChanged();
       render();
     }, "Task restored.");
   }
@@ -57,10 +62,12 @@ export function initTasks() {
     if (removed.length === 0) return;
     tasks = tasks.filter(function (task) { return !task.done; });
     saveJSON(TASKS_KEY, tasks);
+    notifyPlannerChanged();
     render();
     offerUndo(removed.length + " completed task" + (removed.length === 1 ? "" : "s") + " cleared.", function () {
       tasks = restoreRemovedItems(tasks, removed);
       saveJSON(TASKS_KEY, tasks);
+      notifyPlannerChanged();
       render();
     }, "Completed tasks restored.");
   }

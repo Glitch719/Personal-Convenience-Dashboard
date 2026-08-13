@@ -19,8 +19,10 @@ import { initNews }     from "./widgets/news.js";
 import { initSummary }  from "./widgets/summary.js";
 import { initLayout }   from "./widgets/layout.js";
 import { initSettings } from "./widgets/settings.js?v=customization2";
+import { initEditMode } from "./widgets/edit-mode.js";
 
 runSafely("theme",     initTheme);
+runSafely("edit mode", initEditMode);
 runSafely("greeting",  initGreeting);
 runSafely("clock",     initClock);
 runSafely("weather",   initWeather);

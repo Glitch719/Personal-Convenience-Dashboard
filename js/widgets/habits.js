@@ -1,5 +1,6 @@
 import { loadArray, saveJSON } from "../storage.js";
 import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
+import { notifyPlannerChanged } from "../planner.js";
 
 const HABITS_KEY = "dashboard.habits";
 
@@ -10,19 +11,38 @@ function dayKey(d) {
     String(d.getDate()).padStart(2, "0");
 }
 
+export function normalizeHabit(habit) {
+  const schedule = habit?.schedule && Array.isArray(habit.schedule.days)
+    ? {
+        days: Array.from(new Set(habit.schedule.days.filter(function (day) { return Number.isInteger(day) && day >= 0 && day <= 6; }))),
+        time: /^\d{2}:\d{2}$/.test(habit.schedule.time || "") ? habit.schedule.time : "",
+        notify: habit.schedule.notify === true,
+      }
+    : { days: [], time: "", notify: false };
+  return Object.assign({}, habit, {
+    dates: Array.isArray(habit?.dates) ? habit.dates : [],
+    schedule: schedule,
+    notifiedDates: Array.isArray(habit?.notifiedDates) ? habit.notifiedDates : [],
+  });
+}
+
 export function initHabits() {
-  let habits = loadArray(HABITS_KEY);
+  let habits = loadArray(HABITS_KEY).map(normalizeHabit);
 
   const input  = document.getElementById("habit-input");
   const listEl = document.getElementById("habits-list");
   const progressEl = document.getElementById("habits-progress");
   const progressRing = document.getElementById("habit-progress-ring");
   const progressNumber = document.getElementById("habit-progress-number");
+  const timeInput = document.getElementById("habit-time");
+  const notifyInput = document.getElementById("habit-notify");
+  const weekdayButtons = document.querySelectorAll("[data-habit-weekday]");
+  const selectedDays = new Set();
 
-  function save() { saveJSON(HABITS_KEY, habits); }
+  function save() { saveJSON(HABITS_KEY, habits); notifyPlannerChanged(); }
 
-  function addHabit(name) {
-    habits.push({ id: createId(), name: name, dates: [] });
+  function addHabit(name, schedule) {
+    habits.push(normalizeHabit({ id: createId(), name: name, dates: [], schedule: schedule }));
     save(); render();
   }
   function removeHabit(id) {
@@ -103,6 +123,16 @@ export function initHabits() {
       streakEl.className = "habit-streak" + (s > 0 ? " active" : "");
       streakEl.textContent = s > 0 ? s + " day streak" : "no streak";
 
+      const scheduleEl = document.createElement("span");
+      scheduleEl.className = "habit-schedule-summary";
+      if (h.schedule.days.length) {
+        const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        scheduleEl.textContent = h.schedule.days.slice().sort().map(function (day) { return names[day]; }).join(" ") +
+          (h.schedule.time ? " · " + h.schedule.time : "") + (h.schedule.notify ? " · alert" : "");
+      } else {
+        scheduleEl.textContent = "Not scheduled";
+      }
+
       const del = document.createElement("button");
       del.className = "habit-del";
       del.textContent = "\u00D7";
@@ -110,14 +140,14 @@ export function initHabits() {
       del.setAttribute("aria-label", "Remove habit: " + h.name);
       del.addEventListener("click", function () { removeHabit(h.id); });
 
-      head.append(name, streakEl, del);
+      head.append(name, scheduleEl, streakEl, del);
 
       const daysRow = document.createElement("div");
       daysRow.className = "habit-days";
       days.forEach(function (d) {
         const key = dayKey(d);
         const btn = document.createElement("button");
-        btn.className = "habit-day" + (doneSet.has(key) ? " done" : "");
+        btn.className = "habit-day" + (doneSet.has(key) ? " done" : "") + (key === today ? " today" : "");
         btn.textContent = d.toLocaleDateString("en-GB", { weekday: "narrow" });
         btn.title = key;
         btn.setAttribute("aria-label", h.name + " on " + key);
@@ -137,12 +167,52 @@ export function initHabits() {
     if (habits.some(function (habit) { return habit.name.toLowerCase() === name.toLowerCase(); })) {
       return reportStatus("That habit already exists.", input);
     }
-    addHabit(name);
+    const days = Array.from(selectedDays);
+    if (notifyInput.checked && (!days.length || !timeInput.value)) {
+      return reportStatus("Choose weekdays and a time before enabling habit notifications.", timeInput);
+    }
+    if (notifyInput.checked && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+    addHabit(name, { days: days, time: days.length ? timeInput.value : "", notify: notifyInput.checked && days.length > 0 });
     input.value = "";
+    timeInput.value = "";
+    notifyInput.checked = false;
+    selectedDays.clear();
+    weekdayButtons.forEach(function (button) { button.setAttribute("aria-pressed", "false"); });
     input.focus();
+  }
+
+  function checkHabitReminders() {
+    const now = new Date();
+    const today = dayKey(now);
+    const currentTime = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+    let changed = false;
+    habits.forEach(function (habit) {
+      const schedule = habit.schedule;
+      if (!schedule.notify || !schedule.time || !schedule.days.includes(now.getDay()) || habit.dates.includes(today) || habit.notifiedDates.includes(today)) return;
+      if (currentTime < schedule.time) return;
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Habit reminder", { body: habit.name });
+      }
+      habit.notifiedDates = habit.notifiedDates.filter(function (key) { return key >= dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 14)); });
+      habit.notifiedDates.push(today);
+      changed = true;
+    });
+    if (changed) save();
   }
 
   input.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
   document.getElementById("habit-add").addEventListener("click", submit);
+  weekdayButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      const day = Number(button.dataset.habitWeekday);
+      if (selectedDays.has(day)) selectedDays.delete(day); else selectedDays.add(day);
+      button.setAttribute("aria-pressed", String(selectedDays.has(day)));
+    });
+  });
+  save();
   render();
+  checkHabitReminders();
+  setInterval(checkHabitReminders, 30000);
 }

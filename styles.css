@@ -440,6 +440,10 @@ h1, h2, h3 { font-family: var(--font-display); }
 .cal-event-details { display: grid; gap: 8px; padding: 2px 10px 11px; color: var(--muted); font-size: 12px; }
 .cal-event-details p { margin: 0; line-height: 1.45; }
 .cal-event-details a { color: var(--accent); width: fit-content; }
+.cal-external-item { background: color-mix(in srgb, var(--item-color) 5%, var(--bg)); }
+.cal-external-item.completed { opacity: .58; }
+.cal-external-item.completed .cal-event-title { text-decoration: line-through; }
+.cal-completed-badge { color: var(--accent); font-size: 9px; font-weight: 700; text-transform: uppercase; }
 
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 
@@ -762,6 +766,7 @@ h1, h2, h3 { font-family: var(--font-display); }
 .habit-row {}
 .habit-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .habit-name { font-size: 14px; font-weight: 600; flex: 1; }
+.habit-schedule-summary { color: var(--muted); font-size: 10px; }
 .habit-streak { font-size: 12px; color: var(--muted); }
 .habit-streak.active { color: var(--accent); }
 .habit-del { background: none; border: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; }
@@ -775,6 +780,20 @@ h1, h2, h3 { font-family: var(--font-display); }
 }
 .habit-day:hover { border-color: var(--accent); }
 .habit-day.done { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
+.habit-day.today { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--accent); }
+.habit-schedule-form { margin: -4px 0 14px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); }
+.habit-schedule-form > summary { padding: 8px 10px; cursor: pointer; color: var(--muted); font-size: 11px; }
+.habit-schedule-fields { display: flex; align-items: center; gap: 8px; padding: 0 10px 6px; flex-wrap: wrap; }
+.habit-weekdays { display: flex; gap: 4px; }
+.habit-weekdays button {
+  width: 27px; height: 27px; padding: 0; border: 1px solid var(--border); border-radius: 7px;
+  background: var(--bg); color: var(--muted); cursor: pointer; font-size: 10px;
+}
+.habit-weekdays button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+#habit-time { border: 1px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--text); padding: 5px 7px; }
+.habit-notify-option { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; }
+.habit-notify-option input { accent-color: var(--accent); }
+.habit-schedule-hint { margin: 0; padding: 0 10px 9px; color: var(--muted); font-size: 10px; }
 
 .habits-empty { color: var(--muted); font-size: 14px; padding: 4px; }
 

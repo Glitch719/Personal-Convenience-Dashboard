@@ -16,11 +16,14 @@ resilient client-side state, and maintainable modular code without a framework.
 - Run a reload-safe focus timer that stays accurate while the tab is asleep
 - Track categorized expenses, monthly budgets, descriptions, and CSV exports
 - Build habits with a seven-day view, daily progress, and streaks
+- Schedule habits by weekday and time, optionally receive reminders, and see
+  scheduled habits alongside dated tasks and reminders in the calendar
 - Create and edit validated quick links
 - Plan color-coded calendar items with labels, priorities, locations, links,
   expandable details, saved filters, and a collapsible upcoming agenda
 - Merge configurable news feeds with caching, deduplication, and safe links
 - Personalize the greeting, theme, and visible widgets
+- Switch between a clutter-free viewing mode and a global editing mode
 - Reorder widgets by dragging or keyboard controls, collapse cards, and choose
   comfortable or compact density; the layout persists across reloads
 - Undo accidental deletions and bulk clears across every editable data widget

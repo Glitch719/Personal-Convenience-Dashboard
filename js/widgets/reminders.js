@@ -1,6 +1,7 @@
 import { loadArray, saveJSON } from "../storage.js";
 import { createId, formatRelative, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 import { state } from "../state.js";
+import { notifyPlannerChanged } from "../planner.js";
 
 const REMINDERS_KEY = "dashboard.reminders";
 
@@ -29,7 +30,7 @@ export function initReminders() {
       String(date.getMinutes()).padStart(2, "0");
   }
 
-  function save() { saveJSON(REMINDERS_KEY, reminders); }
+  function save() { saveJSON(REMINDERS_KEY, reminders); notifyPlannerChanged(); }
 
   function addReminder(text, whenMs) {
     reminders.push({
