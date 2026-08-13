@@ -37,6 +37,52 @@ export function reportStatus(message, input) {
   }
 }
 
+let undoTimer = null;
+
+// Surface destructive actions without interrupting the user's flow. A new
+// action replaces the previous offer, matching the familiar one-level undo
+// pattern used by mail and task apps.
+export function offerUndo(message, restore, restoredMessage = "Action undone.") {
+  const toast = document.getElementById("undo-toast");
+  const messageEl = document.getElementById("undo-message");
+  const undoBtn = document.getElementById("undo-action");
+  const dismissBtn = document.getElementById("undo-dismiss");
+
+  reportStatus(message + " Undo is available.");
+  if (!toast || !messageEl || !undoBtn || !dismissBtn) return;
+
+  if (undoTimer) clearTimeout(undoTimer);
+  messageEl.textContent = message;
+  toast.hidden = false;
+
+  function close() {
+    toast.hidden = true;
+    undoBtn.onclick = null;
+    dismissBtn.onclick = null;
+    if (undoTimer) clearTimeout(undoTimer);
+    undoTimer = null;
+  }
+
+  undoBtn.onclick = function () {
+    close();
+    restore();
+    reportStatus(restoredMessage);
+  };
+  dismissBtn.onclick = close;
+  undoTimer = setTimeout(close, 8000);
+}
+
+// Reinsert records at their former positions while preserving anything the
+// user added after the deletion. Exported so bulk-undo behavior is testable.
+export function restoreRemovedItems(current, removed) {
+  const next = current.slice();
+  removed.slice().sort(function (a, b) { return a.index - b.index; }).forEach(function (entry) {
+    if (entry.item && entry.item.id && next.some(function (item) { return item.id === entry.item.id; })) return;
+    next.splice(Math.min(Math.max(entry.index, 0), next.length), 0, entry.item);
+  });
+  return next;
+}
+
 // Is this a real IANA timezone? Ask Intl once, safely.
 export function isValidTimeZone(zone) {
   try {

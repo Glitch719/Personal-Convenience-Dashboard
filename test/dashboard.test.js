@@ -16,7 +16,7 @@ class MemoryStorage {
 globalThis.localStorage = new MemoryStorage();
 
 const { exportDashboardData, importDashboardData, loadArray, loadJSON, loadObject, saveJSON } = await import("../js/storage.js");
-const { createId, formatRelative, isValidTimeZone } = await import("../js/utils.js");
+const { createId, formatRelative, isValidTimeZone, restoreRemovedItems } = await import("../js/utils.js");
 const { LOCATIONS, NEWS_FEEDS } = await import("../js/config.js");
 const { remainingSecondsUntil } = await import("../js/widgets/focus.js");
 const { moveInOrder, normalizeOrder } = await import("../js/widgets/layout.js");
@@ -58,6 +58,16 @@ test("typed storage helpers contain malformed values", function () {
 test("generated IDs are unique", function () {
   const ids = new Set(Array.from({ length: 500 }, createId));
   assert.equal(ids.size, 500);
+});
+
+test("removed records can be restored without losing newer records", function () {
+  const newer = [{ id: "new", text: "Added afterwards" }];
+  const restored = restoreRemovedItems(newer, [
+    { index: 0, item: { id: "first", text: "First" } },
+    { index: 1, item: { id: "second", text: "Second" } },
+  ]);
+  assert.deepEqual(restored.map(function (item) { return item.id; }), ["first", "second", "new"]);
+  assert.deepEqual(restoreRemovedItems(restored, [{ index: 0, item: restored[0] }]), restored);
 });
 
 test("focus timer derives reload-safe remaining time from its end timestamp", function () {

@@ -1,5 +1,5 @@
 import { loadArray, saveJSON } from "../storage.js";
-import { createId, formatRelative, reportStatus } from "../utils.js";
+import { createId, formatRelative, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 import { state } from "../state.js";
 
 const REMINDERS_KEY = "dashboard.reminders";
@@ -43,9 +43,16 @@ export function initReminders() {
   }
 
   function deleteReminder(id) {
-    reminders = reminders.filter(function (r) { return r.id !== id; });
+    const index = reminders.findIndex(function (reminder) { return reminder.id === id; });
+    if (index === -1) return;
+    const removed = [{ index: index, item: reminders[index] }];
+    reminders.splice(index, 1);
     save();
     render();
+    offerUndo("Reminder deleted.", function () {
+      reminders = restoreRemovedItems(reminders, removed);
+      save(); render();
+    }, "Reminder restored.");
   }
 
   function snooze(id, minutes) {

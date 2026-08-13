@@ -1,5 +1,5 @@
 import { loadArray, saveJSON } from "../storage.js";
-import { createId, reportStatus } from "../utils.js";
+import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 
 const HABITS_KEY = "dashboard.habits";
 
@@ -26,8 +26,15 @@ export function initHabits() {
     save(); render();
   }
   function removeHabit(id) {
-    habits = habits.filter(function (h) { return h.id !== id; });
+    const index = habits.findIndex(function (habit) { return habit.id === id; });
+    if (index === -1) return;
+    const removed = [{ index: index, item: habits[index] }];
+    habits.splice(index, 1);
     save(); render();
+    offerUndo("Habit removed.", function () {
+      habits = restoreRemovedItems(habits, removed);
+      save(); render();
+    }, "Habit restored.");
   }
   // Mark or unmark a habit as done on a given day.
   function toggleDay(id, key) {

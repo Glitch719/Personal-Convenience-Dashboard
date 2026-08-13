@@ -235,6 +235,24 @@ body::before {
 }
 .widget-grid > section:not(.clock-grid):hover { border-color: var(--border-strong); transform: translateY(-2px); }
 .widget-collapsed-summary, .widget-drag-handle { display: none; }
+
+.undo-toast {
+  position: fixed; z-index: 1000; left: 50%; bottom: max(22px, env(safe-area-inset-bottom));
+  transform: translateX(-50%); display: flex; align-items: center; gap: 12px;
+  width: max-content; max-width: calc(100vw - 32px); padding: 11px 12px 11px 16px;
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 94%, var(--accent) 6%); color: var(--text);
+  box-shadow: 0 16px 50px rgba(0,0,0,.32); font-size: 13px;
+}
+.undo-toast[hidden] { display: none; }
+.undo-toast #undo-message { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.undo-toast button { border: 0; cursor: pointer; }
+.undo-toast #undo-action {
+  border-radius: 7px; padding: 6px 10px; background: var(--accent); color: var(--accent-text);
+  font-weight: 700;
+}
+.undo-toast #undo-dismiss { padding: 3px 5px; background: transparent; color: var(--muted); font-size: 20px; line-height: 1; }
+.undo-toast #undo-dismiss:hover { color: var(--text); }
 .widget-grid > section.widget-collapsed {
   min-height: 0 !important; height: auto !important; padding: 17px 20px !important;
   overflow: visible;

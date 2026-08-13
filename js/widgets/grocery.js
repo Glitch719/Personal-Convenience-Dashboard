@@ -1,5 +1,5 @@
 import { loadArray, saveJSON } from "../storage.js";
-import { createId, reportStatus } from "../utils.js";
+import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 
 const GROCERY_KEY = "dashboard.grocery";
 
@@ -23,13 +23,27 @@ export function initGrocery() {
     save(); render();
   }
   function remove(id) {
-    items = items.filter(function (i) { return i.id !== id; });
+    const index = items.findIndex(function (item) { return item.id === id; });
+    if (index === -1) return;
+    const removed = [{ index: index, item: items[index] }];
+    items.splice(index, 1);
     save(); render();
+    offerUndo("Grocery item removed.", function () {
+      items = restoreRemovedItems(items, removed);
+      save(); render();
+    }, "Grocery item restored.");
   }
   // Bulk operation: drop everything already ticked off, in one go.
   function clearChecked() {
+    const removed = items.map(function (item, index) { return { index: index, item: item }; })
+      .filter(function (entry) { return entry.item.done; });
+    if (removed.length === 0) return;
     items = items.filter(function (i) { return !i.done; });
     save(); render();
+    offerUndo(removed.length + " checked item" + (removed.length === 1 ? "" : "s") + " cleared.", function () {
+      items = restoreRemovedItems(items, removed);
+      save(); render();
+    }, "Checked items restored.");
   }
 
   function render() {

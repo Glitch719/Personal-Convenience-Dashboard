@@ -1,6 +1,6 @@
 import { loadArray, saveJSON } from "../storage.js";
 import { state } from "../state.js";
-import { createId, reportStatus } from "../utils.js";
+import { createId, offerUndo, reportStatus, restoreRemovedItems } from "../utils.js";
 
 const EVENTS_KEY = "dashboard.events";
 
@@ -70,11 +70,18 @@ export function initCalendar() {
   }
 
   function deleteEvent(id) {
-    events = events.filter(function (e) { return e.id !== id; });
+    const index = events.findIndex(function (event) { return event.id === id; });
+    if (index === -1) return;
+    const removed = [{ index: index, item: events[index] }];
+    events.splice(index, 1);
     save();
     publishNextEvent();
     renderCalendar();
     renderPanel();
+    offerUndo("Calendar event deleted.", function () {
+      events = restoreRemovedItems(events, removed);
+      save(); publishNextEvent(); renderCalendar(); renderPanel();
+    }, "Calendar event restored.");
   }
 
   // Notes autosave. Crucially this does NOT re-render: rebuilding the panel
