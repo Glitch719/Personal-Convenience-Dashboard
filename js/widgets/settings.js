@@ -76,7 +76,7 @@ export function initSettings() {
 
   // Close when clicking anywhere outside the panel or the button.
   document.addEventListener("click", function (e) {
-    if (!panel.hidden && !panel.contains(e.target) && e.target !== btn) {
+    if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) {
       panel.hidden = true;
       btn.setAttribute("aria-expanded", "false");
     }

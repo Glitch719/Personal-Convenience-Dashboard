@@ -17,7 +17,7 @@ import { initLinks }    from "./widgets/links.js";
 import { initCalendar } from "./widgets/calendar.js";
 import { initNews }     from "./widgets/news.js";
 import { initSummary }  from "./widgets/summary.js";
-import { initSettings } from "./widgets/settings.js";
+import { initSettings } from "./widgets/settings.js?v=redesign";
 
 runSafely("theme",     initTheme);
 runSafely("greeting",  initGreeting);

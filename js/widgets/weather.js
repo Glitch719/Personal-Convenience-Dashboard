@@ -72,6 +72,18 @@ function renderWeather(w, statsEl) {
   document.getElementById("weather-city").textContent = w.city;
   document.getElementById("weather-temp").textContent = w.temp + "\u00B0";
   document.getElementById("weather-cond").textContent = w.cond;
+  const symbolEl = document.getElementById("weather-symbol");
+  const orbEl = document.getElementById("weather-orb");
+  const condition = w.cond.toLowerCase();
+  let symbol = "☀";
+  let mood = "clear";
+  if (condition.includes("thunder")) { symbol = "ϟ"; mood = "storm"; }
+  else if (condition.includes("snow")) { symbol = "✦"; mood = "snow"; }
+  else if (condition.includes("rain") || condition.includes("drizzle") || condition.includes("shower")) { symbol = "◒"; mood = "rain"; }
+  else if (condition.includes("fog")) { symbol = "≋"; mood = "fog"; }
+  else if (condition.includes("cloud") || condition.includes("overcast")) { symbol = "☁"; mood = "cloud"; }
+  symbolEl.textContent = symbol;
+  orbEl.setAttribute("data-weather-mood", mood);
 
   const stats = [
     { key: "Feels like", val: w.feels + "\u00B0" },

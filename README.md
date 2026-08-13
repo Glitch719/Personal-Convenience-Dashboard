@@ -1,6 +1,6 @@
-# Daily Dashboard
+# Daymark
 
-A privacy-friendly personal dashboard that brings planning, routines, time,
+A privacy-friendly personal command center that brings planning, routines, time,
 weather, news, and lightweight money tracking into one responsive browser app.
 It is built with plain HTML, CSS, and JavaScript to demonstrate accessible UI,
 resilient client-side state, and maintainable modular code without a framework.
@@ -21,6 +21,19 @@ resilient client-side state, and maintainable modular code without a framework.
 - Merge configurable news feeds with caching, deduplication, and safe links
 - Personalize the greeting, theme, and visible widgets
 - Export or restore all dashboard data from a JSON backup
+
+## Design direction
+
+Daymark uses a calm, editorial “productivity command center” aesthetic instead
+of a uniform wall of cards. A responsive bento layout gives important tools more
+space, the hero surfaces the day’s most useful context, and widget-specific
+accents make the interface easier to scan. Weather, focus, habits, spending, and
+news use distinct data-driven visuals while sharing one consistent type, spacing,
+surface, and interaction system.
+
+The Midnight, Daylight, and Ember themes all use the same semantic design tokens,
+and the interface adapts from a wide 12-column workspace to a single-column
+mobile flow without changing functionality.
 
 All personal data stays in browser storage. Weather comes from Open-Meteo, and
 news uses the RSS sources in `js/config.js` through public CORS proxies.
