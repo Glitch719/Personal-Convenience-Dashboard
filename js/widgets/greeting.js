@@ -13,6 +13,13 @@ function updateGreeting() {
 
   const textEl = document.getElementById("greeting-text");
   const subEl  = document.getElementById("greeting-sub");
+  const dateEl = document.getElementById("header-date");
+
+  if (dateEl) {
+    dateEl.textContent = new Intl.DateTimeFormat("en-GB", {
+      weekday: "short", day: "numeric", month: "short", year: "numeric",
+    }).format(new Date());
+  }
 
   if (!localLoc) {
     textEl.textContent = "Hello.";

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
+  <title>Daymark — Personal Dashboard</title>
 
   <!-- Apply the saved theme before any CSS paints, to avoid a flash of the
        default theme on load. Runs immediately, not deferred like a module. -->
@@ -20,11 +20,11 @@
 
   <!-- Our styles now live in their own file. -->
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="redesign.css?v=1" />
 </head>
 
 <body>
   <div id="app-status" class="sr-only" role="status" aria-live="polite"></div>
-  <button type="button" class="settings-btn" id="settings-btn" aria-controls="settings-panel" aria-expanded="false">Settings</button>
   <div class="settings-panel" id="settings-panel" role="dialog" aria-label="Dashboard settings" hidden>
     <h2>Personalize</h2>
     <div class="settings-name-row">
@@ -48,22 +48,44 @@
 
   <div class="dashboard">
 
-    <header class="greeting">
-      <h1 id="greeting-text">Hello.</h1>
-      <p id="greeting-sub">Loading your day...</p>
-    </header>
+    <nav class="app-bar" aria-label="Dashboard controls">
+      <a class="brand" href="#top" aria-label="Daymark home">
+        <span class="brand-mark" aria-hidden="true">D</span>
+        <span><strong>Daymark</strong><small>Your personal command center</small></span>
+      </a>
+      <div class="app-bar-actions">
+        <span class="header-date" id="header-date"></span>
+        <button type="button" class="settings-btn" id="settings-btn" aria-controls="settings-panel" aria-expanded="false">
+          <span aria-hidden="true">☰</span> Customize
+        </button>
+      </div>
+    </nav>
 
-    <!-- Today summary: reads snapshots from the other widgets. -->
-    <section class="summary-card" id="summary" data-widget="summary" data-widget-label="Today">
-      <div class="summary-header"><h2>Today</h2></div>
-      <div class="summary-body" id="summary-body"></div>
-    </section>
+    <div class="hero" id="top">
+      <header class="greeting">
+        <span class="eyebrow">Your day at a glance</span>
+        <h1 id="greeting-text">Hello.</h1>
+        <p id="greeting-sub">Loading your day...</p>
+      </header>
 
-    <!-- Everything below flows into a responsive masonry of columns. -->
+      <!-- Today summary: reads snapshots from the other widgets. -->
+      <section class="summary-card" id="summary" data-widget="summary" data-widget-label="Today">
+        <div class="summary-header"><h2>Today’s pulse</h2><span class="live-pill"><i></i> Live</span></div>
+        <div class="summary-body" id="summary-body"></div>
+      </section>
+    </div>
+
+    <div class="section-heading">
+      <div><span class="eyebrow">Workspace</span><h2>Everything that moves your day forward</h2></div>
+      <p>Plan, focus, track, and stay informed—all in one place.</p>
+    </div>
+
+    <!-- Widgets use a responsive bento layout with deliberate visual hierarchy. -->
     <div class="widget-grid">
 
     <!-- Weather widget. JavaScript fills in the numbers. -->
     <section class="weather-card" id="weather" data-widget="weather" data-widget-label="Weather">
+      <div class="weather-orb" id="weather-orb" aria-hidden="true"><span id="weather-symbol">·</span></div>
       <div class="weather-left">
         <div class="widget-title-row">
           <div class="weather-city" id="weather-city"></div>
@@ -146,7 +168,10 @@
     <!-- Focus timer widget. -->
     <section class="focus-card" id="focus" data-widget="focus" data-widget-label="Focus timer">
       <div class="focus-header"><h2>Focus</h2></div>
-      <div class="focus-time" id="focus-time">25:00</div>
+      <div class="focus-dial" id="focus-dial">
+        <div class="focus-time" id="focus-time">25:00</div>
+        <span>Deep work</span>
+      </div>
       <div class="focus-presets">
         <button type="button" data-focus-min="25" class="active" aria-pressed="true">25 min</button>
         <button type="button" data-focus-min="15" aria-pressed="false">15 min</button>
@@ -198,7 +223,11 @@
 
     <!-- Habit tracker widget. -->
     <section class="habits-card" id="habits" data-widget="habits" data-widget-label="Habits">
-      <div class="habits-header"><h2>Habits</h2><span class="widget-status" id="habits-progress"></span></div>
+      <div class="habits-header">
+        <h2>Habits</h2>
+        <div class="habit-progress-ring" id="habit-progress-ring"><span id="habit-progress-number">0%</span></div>
+      </div>
+      <span class="widget-status habits-progress-copy" id="habits-progress"></span>
       <div class="habits-input-row">
         <input type="text" id="habit-input" placeholder="New habit and press Enter" aria-label="New habit" maxlength="100" />
         <button type="button" id="habit-add">Add</button>
@@ -250,6 +279,6 @@
 
   <!-- One entry point, loaded as a module so it can import the others. -->
   <!-- type="module" requires a server (Live Server), not a double-clicked file. -->
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/main.js?v=redesign"></script>
 </body>
 </html>

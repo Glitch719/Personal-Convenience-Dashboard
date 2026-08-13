@@ -17,6 +17,7 @@ export function initFocus() {
   const startBtn  = document.getElementById("focus-start");
   const resetBtn  = document.getElementById("focus-reset");
   const presets   = document.querySelectorAll("[data-focus-min]");
+  const dial      = document.getElementById("focus-dial");
 
   const stored = loadJSON(FOCUS_KEY, {});
   const saved = stored && typeof stored === "object" ? stored : {};
@@ -47,6 +48,8 @@ export function initFocus() {
 
   function updateDisplay() {
     display.textContent = format(remaining);
+    const progress = durationSec > 0 ? Math.max(0, Math.min(1, remaining / durationSec)) : 0;
+    dial.style.setProperty("--focus-progress", (progress * 360) + "deg");
   }
 
   function start(requestPermission, restoredEnd) {

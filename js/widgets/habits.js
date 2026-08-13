@@ -16,6 +16,8 @@ export function initHabits() {
   const input  = document.getElementById("habit-input");
   const listEl = document.getElementById("habits-list");
   const progressEl = document.getElementById("habits-progress");
+  const progressRing = document.getElementById("habit-progress-ring");
+  const progressNumber = document.getElementById("habit-progress-number");
 
   function save() { saveJSON(HABITS_KEY, habits); }
 
@@ -64,7 +66,10 @@ export function initHabits() {
     listEl.innerHTML = "";
     const today = dayKey(new Date());
     const doneToday = habits.filter(function (habit) { return habit.dates.includes(today); }).length;
+    const percent = habits.length ? Math.round(doneToday / habits.length * 100) : 0;
     progressEl.textContent = habits.length ? doneToday + " of " + habits.length + " done today" : "";
+    progressNumber.textContent = percent + "%";
+    progressRing.style.setProperty("--habit-progress", (percent * 3.6) + "deg");
     if (habits.length === 0) {
       listEl.innerHTML = '<p class="habits-empty">No habits yet. Add one above.</p>';
       return;
