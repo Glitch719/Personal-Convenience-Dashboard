@@ -18,11 +18,12 @@ globalThis.localStorage = new MemoryStorage();
 const { exportDashboardData, importDashboardData, loadArray, loadJSON, loadObject, saveJSON } = await import("../js/storage.js");
 const { createId, formatRelative, isValidTimeZone, restoreRemovedItems } = await import("../js/utils.js");
 const { LOCATIONS, NEWS_FEEDS } = await import("../js/config.js");
-const { remainingSecondsUntil } = await import("../js/widgets/focus.js");
+const { elapsedSecondsSince, remainingSecondsUntil } = await import("../js/widgets/focus.js");
 const { moveInOrder, normalizeOrder } = await import("../js/widgets/layout.js");
 const { normalizeCalendarEvent, sortCalendarItems, sortUpcomingItems } = await import("../js/widgets/calendar.js");
 const { normalizeHabit } = await import("../js/widgets/habits.js");
 const { projectHabitItems, projectReminderItems, projectTaskItems } = await import("../js/planner.js");
+const { buildNowNextItems } = await import("../js/widgets/now-next.js");
 
 test("storage round-trips dashboard data", function () {
   localStorage.clear();
@@ -78,6 +79,18 @@ test("focus timer derives reload-safe remaining time from its end timestamp", fu
   assert.equal(remainingSecondsUntil(now + 90_000, now), 90);
   assert.equal(remainingSecondsUntil(now + 1, now), 1);
   assert.equal(remainingSecondsUntil(now - 1, now), 0);
+  assert.equal(elapsedSecondsSince(now - 5_500, 10, now), 15);
+});
+
+test("Now & Next prioritizes active timing and overdue schedule items", function () {
+  const now = new Date(2026, 7, 13, 12, 0).getTime();
+  const items = buildNowNextItems(now, [
+    { id: "later", title: "Later task", type: "task", label: "Task", date: "2026-08-13", time: "15:00" },
+    { id: "overdue", title: "Missed reminder", type: "reminder", label: "Reminder", date: "2026-08-13", time: "11:00" },
+  ], [], { running: true, mode: "countdown", label: "Focus timer", seconds: 90 });
+  assert.deepEqual(items.map(function (item) { return item.kind; }), ["active", "overdue", "task"]);
+  assert.equal(items[0].title, "01:30");
+  assert.equal(items[1].title, "Missed reminder");
 });
 
 test("saved widget layouts are normalized and movable", function () {

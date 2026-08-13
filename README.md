@@ -14,6 +14,9 @@ resilient client-side state, and maintainable modular code without a framework.
 - Schedule reminders with quick times, notifications, and snoozing
 - Manage a grocery list with duplicate prevention and progress counts
 - Run a reload-safe focus timer that stays accurate while the tab is asleep
+- Use custom countdowns or a reload-safe stopwatch with an optional sound cue
+- See active timing, overdue reminders, and upcoming plans in a compact
+  Now & Next strip at the top of the dashboard
 - Track categorized expenses, monthly budgets, descriptions, and CSV exports
 - Build habits with a seven-day view, daily progress, and streaks
 - Schedule habits by weekday and time, optionally receive reminders, and see

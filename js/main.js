@@ -20,6 +20,7 @@ import { initSummary }  from "./widgets/summary.js";
 import { initLayout }   from "./widgets/layout.js";
 import { initSettings } from "./widgets/settings.js?v=customization2";
 import { initEditMode } from "./widgets/edit-mode.js";
+import { initNowNext } from "./widgets/now-next.js";
 
 runSafely("theme",     initTheme);
 runSafely("edit mode", initEditMode);
@@ -34,6 +35,7 @@ runSafely("expenses",  initExpenses);
 runSafely("habits",    initHabits);
 runSafely("links",     initLinks);
 runSafely("calendar",  initCalendar);
+runSafely("now & next", initNowNext);
 runSafely("news",      initNews);
 runSafely("summary",   initSummary);   // last widget: others publish before it first reads
 runSafely("layout",    initLayout);    // applies saved widget order, density, and collapsed state

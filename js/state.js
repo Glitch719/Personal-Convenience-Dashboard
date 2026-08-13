@@ -13,4 +13,5 @@ export const state = {
   nextReminder: null,     // reminders -> summary             { text, time }
   nextEvent: null,        // calendar  -> summary             { title, time, whenMs, ... }
   expenseTotal: null,     // expenses  -> summary             { amount, currency }
+  focusSession: null,     // focus     -> Now & Next          { mode, running, seconds }
 };

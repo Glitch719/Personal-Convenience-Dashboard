@@ -92,6 +92,14 @@
       </section>
     </div>
 
+    <section class="now-next" id="now-next" aria-labelledby="now-next-title">
+      <div class="now-next-heading">
+        <span class="eyebrow">Live schedule</span>
+        <h2 id="now-next-title">Now &amp; Next</h2>
+      </div>
+      <div class="now-next-list" id="now-next-list"></div>
+    </section>
+
     <div class="section-heading">
       <div><span class="eyebrow">Workspace</span><h2>Everything that moves your day forward</h2></div>
       <p>Plan, focus, track, and stay informed—all in one place.</p>
@@ -185,14 +193,27 @@
     <!-- Focus timer widget. -->
     <section class="focus-card" id="focus" data-widget="focus" data-widget-label="Focus timer">
       <div class="focus-header"><h2>Focus</h2></div>
+      <div class="focus-setup">
+        <div class="focus-mode-tabs" role="group" aria-label="Timer mode">
+          <button type="button" data-focus-mode="countdown" aria-pressed="true">Countdown</button>
+          <button type="button" data-focus-mode="stopwatch" aria-pressed="false">Stopwatch</button>
+        </div>
+      </div>
       <div class="focus-dial" id="focus-dial">
         <div class="focus-time" id="focus-time">25:00</div>
-        <span>Deep work</span>
+        <span id="focus-label">Deep work</span>
       </div>
-      <div class="focus-presets">
-        <button type="button" data-focus-min="25" class="active" aria-pressed="true">25 min</button>
-        <button type="button" data-focus-min="15" aria-pressed="false">15 min</button>
-        <button type="button" data-focus-min="5" aria-pressed="false">5 min</button>
+      <div class="focus-setup" id="focus-countdown-setup">
+        <div class="focus-presets">
+          <button type="button" data-focus-min="25" class="active" aria-pressed="true">25 min</button>
+          <button type="button" data-focus-min="15" aria-pressed="false">15 min</button>
+          <button type="button" data-focus-min="5" aria-pressed="false">5 min</button>
+        </div>
+        <div class="focus-custom-row">
+          <input type="number" id="focus-custom-min" min="1" max="240" value="25" aria-label="Custom countdown minutes" />
+          <button type="button" id="focus-custom-apply">Set custom</button>
+          <label><input type="checkbox" id="focus-sound" checked /> Sound cue</label>
+        </div>
       </div>
       <div class="focus-controls">
         <button type="button" id="focus-start" class="focus-primary">Start</button>
@@ -323,6 +344,6 @@
 
   <!-- One entry point, loaded as a module so it can import the others. -->
   <!-- type="module" requires a server (Live Server), not a double-clicked file. -->
-  <script type="module" src="js/main.js?v=planner1"></script>
+  <script type="module" src="js/main.js?v=planner2"></script>
 </body>
 </html>
