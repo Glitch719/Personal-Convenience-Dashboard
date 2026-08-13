@@ -20,6 +20,7 @@ const { createId, formatRelative, isValidTimeZone, restoreRemovedItems } = await
 const { LOCATIONS, NEWS_FEEDS } = await import("../js/config.js");
 const { remainingSecondsUntil } = await import("../js/widgets/focus.js");
 const { moveInOrder, normalizeOrder } = await import("../js/widgets/layout.js");
+const { normalizeCalendarEvent, sortCalendarItems, sortUpcomingItems } = await import("../js/widgets/calendar.js");
 
 test("storage round-trips dashboard data", function () {
   localStorage.clear();
@@ -84,6 +85,19 @@ test("saved widget layouts are normalized and movable", function () {
   );
   assert.deepEqual(moveInOrder(["weather", "tasks", "focus"], "focus", -1), ["weather", "focus", "tasks"]);
   assert.deepEqual(moveInOrder(["weather", "tasks", "focus"], "weather", -1), ["weather", "tasks", "focus"]);
+});
+
+test("calendar items migrate safely and respect day and agenda ordering", function () {
+  const legacy = normalizeCalendarEvent({ id: "old", date: "2026-08-14", title: "Legacy item", notes: "Kept" });
+  assert.equal(legacy.type, "event");
+  assert.equal(legacy.priority, "normal");
+  assert.equal(legacy.notes, "Kept");
+
+  const lowEarly = normalizeCalendarEvent({ id: "low", date: "2026-08-14", time: "08:00", title: "Low", priority: "low" });
+  const highLate = normalizeCalendarEvent({ id: "high", date: "2026-08-14", time: "18:00", title: "High", priority: "high" });
+  const tomorrow = normalizeCalendarEvent({ id: "tomorrow", date: "2026-08-15", time: "07:00", title: "Tomorrow", priority: "high" });
+  assert.deepEqual(sortCalendarItems([lowEarly, highLate]).map(function (item) { return item.id; }), ["high", "low"]);
+  assert.deepEqual(sortUpcomingItems([tomorrow, lowEarly, highLate]).map(function (item) { return item.id; }), ["high", "low", "tomorrow"]);
 });
 
 test("configured timezones and feed URLs are valid", function () {

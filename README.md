@@ -17,7 +17,8 @@ resilient client-side state, and maintainable modular code without a framework.
 - Track categorized expenses, monthly budgets, descriptions, and CSV exports
 - Build habits with a seven-day view, daily progress, and streaks
 - Create and edit validated quick links
-- Plan calendar events with optional times and autosaved preparation notes
+- Plan color-coded calendar items with labels, priorities, locations, links,
+  expandable details, saved filters, and a collapsible upcoming agenda
 - Merge configurable news feeds with caching, deduplication, and safe links
 - Personalize the greeting, theme, and visible widgets
 - Reorder widgets by dragging or keyboard controls, collapse cards, and choose
