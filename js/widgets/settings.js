@@ -1,5 +1,6 @@
 import { exportDashboardData, importDashboardData, loadJSON, loadObject, saveJSON } from "../storage.js";
 import { reportStatus } from "../utils.js";
+import { getLayoutApi } from "./layout.js";
 
 const VISIBILITY_KEY = "dashboard.widgetVisibility";
 const NAME_KEY = "dashboard.displayName";
@@ -13,6 +14,10 @@ export function initSettings() {
   const importBtn = document.getElementById("settings-import-btn");
   const nameInput = document.getElementById("settings-name");
   const nameSaveBtn = document.getElementById("settings-name-save");
+  const densityButtons = document.querySelectorAll("[data-density]");
+  const arrangeBtn = document.getElementById("layout-arrange");
+  const resetLayoutBtn = document.getElementById("layout-reset");
+  const layoutApi = getLayoutApi();
 
   // Auto-discovery: find every section tagged as a widget. Adding a new
   // widget later needs nothing here, just the data-widget attribute on it.
@@ -43,13 +48,27 @@ export function initSettings() {
 
   function buildList() {
     list.innerHTML = "";
-    widgets.forEach(function (w) {
-      const row = document.createElement("label");
+    const layoutState = layoutApi ? layoutApi.getState() : { order: [], collapsed: {}, density: "comfortable" };
+    const sortedWidgets = widgets.slice().sort(function (a, b) {
+      const ai = layoutState.order.indexOf(a.id);
+      const bi = layoutState.order.indexOf(b.id);
+      if (ai === -1 && bi === -1) return 0;
+      if (ai === -1) return -1;
+      if (bi === -1) return 1;
+      return ai - bi;
+    });
+
+    sortedWidgets.forEach(function (w) {
+      const row = document.createElement("div");
       row.className = "settings-row";
+
+      const visibilityLabel = document.createElement("label");
+      visibilityLabel.className = "settings-widget-label";
 
       const box = document.createElement("input");
       box.type = "checkbox";
       box.checked = isVisible(w.id);
+      box.setAttribute("aria-label", "Show " + w.label);
       box.addEventListener("change", function () {
         visibility[w.id] = box.checked;
         saveJSON(VISIBILITY_KEY, visibility);
@@ -59,12 +78,54 @@ export function initSettings() {
       const name = document.createElement("span");
       name.textContent = w.label;
 
-      row.append(box, name);
+      visibilityLabel.append(box, name);
+      row.appendChild(visibilityLabel);
+
+      if (layoutApi && layoutState.order.includes(w.id)) {
+        const controls = document.createElement("div");
+        controls.className = "settings-widget-controls";
+
+        const collapseBtn = document.createElement("button");
+        collapseBtn.type = "button";
+        collapseBtn.textContent = layoutState.collapsed[w.id] ? "+" : "−";
+        collapseBtn.title = layoutState.collapsed[w.id] ? "Expand" : "Collapse";
+        collapseBtn.setAttribute("aria-label", (layoutState.collapsed[w.id] ? "Expand " : "Collapse ") + w.label);
+        collapseBtn.addEventListener("click", function () { layoutApi.toggleCollapsed(w.id); });
+
+        const upBtn = document.createElement("button");
+        upBtn.type = "button";
+        upBtn.textContent = "↑";
+        upBtn.title = "Move up";
+        upBtn.setAttribute("aria-label", "Move " + w.label + " up");
+        upBtn.disabled = layoutState.order.indexOf(w.id) === 0;
+        upBtn.addEventListener("click", function () { layoutApi.move(w.id, -1); });
+
+        const downBtn = document.createElement("button");
+        downBtn.type = "button";
+        downBtn.textContent = "↓";
+        downBtn.title = "Move down";
+        downBtn.setAttribute("aria-label", "Move " + w.label + " down");
+        downBtn.disabled = layoutState.order.indexOf(w.id) === layoutState.order.length - 1;
+        downBtn.addEventListener("click", function () { layoutApi.move(w.id, 1); });
+
+        controls.append(collapseBtn, upBtn, downBtn);
+        row.appendChild(controls);
+      }
+
       list.appendChild(row);
+    });
+
+    densityButtons.forEach(function (button) {
+      button.setAttribute("aria-pressed", String(button.dataset.density === layoutState.density));
     });
   }
 
   // Open/close the panel.
+  // Keep clicks inside the panel from reaching the outside-click handler.
+  // Some layout actions rebuild their own controls during the click, which
+  // detaches the original target before the event reaches document.
+  panel.addEventListener("click", function (event) { event.stopPropagation(); });
+
   btn.addEventListener("click", function () {
     panel.hidden = !panel.hidden;
     btn.setAttribute("aria-expanded", String(!panel.hidden));
@@ -124,6 +185,33 @@ export function initSettings() {
   }
   nameSaveBtn.addEventListener("click", saveName);
   nameInput.addEventListener("keydown", function (e) { if (e.key === "Enter") saveName(); });
+
+  densityButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      if (layoutApi) layoutApi.setDensity(button.dataset.density);
+    });
+  });
+
+  arrangeBtn.addEventListener("click", function () {
+    if (!layoutApi) return;
+    const next = !layoutApi.getState().arranging;
+    layoutApi.setArranging(next);
+    arrangeBtn.textContent = next ? "Done arranging" : "Arrange widgets";
+    arrangeBtn.classList.toggle("active", next);
+  });
+
+  resetLayoutBtn.addEventListener("click", function () {
+    if (layoutApi) layoutApi.reset();
+  });
+
+  window.addEventListener("dashboard:layout-changed", function () {
+    buildList();
+    if (layoutApi) {
+      const state = layoutApi.getState();
+      arrangeBtn.textContent = state.arranging ? "Done arranging" : "Arrange widgets";
+      arrangeBtn.classList.toggle("active", state.arranging);
+    }
+  });
 
   buildList();
   apply();

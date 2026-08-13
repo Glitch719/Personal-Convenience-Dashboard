@@ -17,7 +17,8 @@ import { initLinks }    from "./widgets/links.js";
 import { initCalendar } from "./widgets/calendar.js";
 import { initNews }     from "./widgets/news.js";
 import { initSummary }  from "./widgets/summary.js";
-import { initSettings } from "./widgets/settings.js?v=redesign";
+import { initLayout }   from "./widgets/layout.js";
+import { initSettings } from "./widgets/settings.js?v=customization2";
 
 runSafely("theme",     initTheme);
 runSafely("greeting",  initGreeting);
@@ -33,4 +34,5 @@ runSafely("links",     initLinks);
 runSafely("calendar",  initCalendar);
 runSafely("news",      initNews);
 runSafely("summary",   initSummary);   // last widget: others publish before it first reads
+runSafely("layout",    initLayout);    // applies saved widget order, density, and collapsed state
 runSafely("settings",  initSettings);  // controls which of the above are shown
